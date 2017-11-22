@@ -131,9 +131,107 @@ function createScene()
   console.log(scene);
 }
 
+// Handles the Movement of the Snake
+function headMovement()
+{
+	// move left
+	if (Key.isDown(Key.A) || Key.isDown(Key.Left))
+	{
+		var flag = document.getElementById("debug");
+		flag.value = "left";
+
+		if (snakeXSpeed != 0)
+		{
+			if (snakeXSpeed > 0)
+			{
+				// from +x to +y
+				snakeXSpeed = 0;
+				snakeYSpeed = STEP;
+			}
+			else
+			{
+				// from -x to -y
+				snakeXSpeed = 0;
+				snakeYSpeed = -STEP;
+			}
+		}
+		else
+		{
+			if (snakeYSpeed > 0)
+			{
+				// from +y to -x
+				snakeXSpeed = -STEP;
+				snakeYSpeed = 0;
+			}
+			else
+			{
+				// from -y to +x
+				snakeXSpeed = STEP;
+				snakeYSpeed = 0;
+			}
+		}
+	}
+	// move right
+	else if (Key.isDown(Key.D) || Key.isDown(Key.Right))
+	{
+		// window.alert("Moving Right");
+		var flag = document.getElementById("debug");
+		flag.value = "right";
+
+		if (snakeXSpeed != 0)
+		{
+			if (snakeXSpeed > 0)
+			{
+				// from +x to -y
+				snakeXSpeed = 0;
+				snakeYSpeed = -STEP;
+			}
+			else
+			{
+				// from -x to +y
+				snakeXSpeed = 0;
+				snakeYSpeed = STEP;
+			}
+		}
+		else
+		{
+			if (snakeYSpeed > 0)
+			{
+				// from +y to +x
+				snakeXSpeed = STEP;
+				snakeYSpeed = 0;
+			}
+			else
+			{
+				// from -y to -x
+				snakeXSpeed = -STEP;
+				snakeYSpeed = 0;
+			}
+		}
+	}
+	// move forward
+	else
+	{
+		var flag = document.getElementById("debug");
+		flag.value = "forward";
+	}
+
+	head.position.x += snakeXSpeed;
+	head.position.y += snakeYSpeed;
+}
+
+function bodyMovement()
+{
+	tail = body[body.length-1];
+	tail.position.x = head.position.x;
+	tail.position.y = head.position.y;
+}
+
 function draw()
 {
-  renderer.render(scene, camera);
+	renderer.render(scene, camera);
+	bodyMovement();
+	headMovement();
 
 	requestAnimationFrame(draw);
 }
