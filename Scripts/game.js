@@ -1,15 +1,16 @@
-// Global Variables
 var renderer, camera, scene;
 
-// set the scene size
-var WIDTH = 640,
-  HEIGHT = 360;
+var planeWidth = 640;
+var planeHeight = 360;
 
-// set the view
-var VIEW_ANGLE = 50,
-  ASPECT = WIDTH / HEIGHT,
-  NEAR = 0.1,
-  FAR = 10000;
+var STEP = 10;
+var head;
+var body = [];
+var bodyLength = 5;
+var startPosition = [0, 0, STEP/2];
+var headXSpeed, headYSpeed;
+
+
 
 function setup()
 {
@@ -21,73 +22,118 @@ function setup()
 function createScene()
 {
 	/*window.alert("createScene");*/
+  // set the scene size
+  var WIDTH = 640,
+    HEIGHT = 360;
 
-	// create a WebGL renderer, camera
+	// set some camera attributes
+	var VIEW_ANGLE = 80,
+	  ASPECT = WIDTH / HEIGHT,
+	  NEAR = 0.1,
+	  FAR = 10000;
+
+	var c = document.getElementById("gameCanvas");
+
+  // create a WebGL renderer, camera
 	// and a scene
 	renderer = new THREE.WebGLRenderer();
-
-	// start the renderer
-	renderer.setSize(WIDTH, HEIGHT);
-
-	// attach the render-supplied DOM element (the gameCanvas)
-	var c = document.getElementById("gameCanvas");
-	c.appendChild(renderer.domElement);
-
-	camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+	camera =
+	  new THREE.PerspectiveCamera(
+		VIEW_ANGLE,
+		ASPECT,
+		NEAR,
+		FAR);
 
 	scene = new THREE.Scene();
 
 	// add the camera to the scene
-	scene.add(camera);
+
 
 	// set a default position for the camera
 	// not doing this somehow messes up shadow rendering
-	camera.position.z = 350;
+  camera.position.x = startPosition[0] - STEP;
+  camera.position.y = startPosition[1];
+	camera.position.z = startPosition[2] + STEP*5;
 
+	camera.rotation.y = 45 * Math.PI/180;
+	camera.rotation.z = 90 * Math.PI/180;
 
-	// set up the sphere vars
-	// lower 'segment' and 'ring' values will increase performance
-	var radius = 50,
-	segments = 16,
-	rings = 16;
+  scene.add(camera);
 
-	// create the sphere's material
-	var sphereMaterial =
-	new THREE.MeshLambertMaterial(
-	{
-	color: 0xD43001
-	});
+	// start the renderer
+	renderer.setSize(WIDTH, HEIGHT);
 
-	// Create a ball with sphere geometry
-	var ball = new THREE.Mesh(
-	    new THREE.SphereGeometry(radius,
-	    segments,
-	    rings),
-	    sphereMaterial);
+	// attach the render-supplied DOM element
+	c.appendChild(renderer.domElement);
 
-	// add the sphere to the scene
-	scene.add(ball);
+	// set up the playing surface plane
 
-	// // create a point light
-	pointLight = new THREE.PointLight(0xF8D898);
+	var	planeQuality = 10;
 
-	// set its position
-	pointLight.position.x = -1000;
-	pointLight.position.y = 0;
-	pointLight.position.z = 1000;
-	pointLight.intensity = 5.0;
-	pointLight.distance = 10000;
+  var snakeMaterial =
+	  new THREE.MeshLambertMaterial(
+		{
+		  color: 0x1B32C0
+		});
 
-	// add to the scene
-	scene.add(pointLight);
+  var planeMaterial =
+	  new THREE.MeshLambertMaterial(
+		{
+		  color: 0x4BD121
+		});
 
+  var plane = new THREE.Mesh(
+
+	  new THREE.PlaneGeometry(
+		planeWidth,	// 95% of table width, since we want to show where the ball goes out-of-bounds
+		planeHeight,
+		planeQuality,
+		planeQuality),
+
+	  planeMaterial);
+
+	scene.add(plane);
+
+  for (var i = 0; i < bodyLength; ++i) {
+    var bodyBlock = new THREE.Mesh(
+
+  	  new THREE.CubeGeometry(
+  		STEP,	// this creates the feel of a billiards table, with a lining
+  		STEP,
+  		STEP,				// an arbitrary depth, the camera can't see much of it anyway
+  		1,
+  		1,
+  		1),
+
+  	  snakeMaterial);
+    bodyBlock.position.x = startPosition[0] - i * STEP;
+    bodyBlock.position.y = startPosition[1];
+  	bodyBlock.position.z = startPosition[2];
+  	scene.add(bodyBlock);
+
+    body.push(bodyBlock);
+    console.log(body);
+  	// bodyBlock.receiveShadow = true;
+  }
+
+  pointLight =
+    new THREE.PointLight(0xF8D898);
+
+  // set its position
+  pointLight.position.x = -1000;
+  pointLight.position.y = 0;
+  pointLight.position.z = 1000;
+  pointLight.intensity = 2.9;
+  pointLight.distance = 10000;
+  // add to the scene
+  scene.add(pointLight);
+
+  console.log(scene);
 }
 
 function draw()
 {
-
-	// draw THREE.JS scene
-    renderer.render(scene, camera);
+  renderer.render(scene, camera);
 
 	requestAnimationFrame(draw);
 }
