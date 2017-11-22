@@ -106,7 +106,7 @@ function createScene()
   		1),
 
   	  snakeMaterial);
-    bodyBlock.position.x = startPosition[0] - i * STEP;
+    bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
     bodyBlock.position.y = startPosition[1];
   	bodyBlock.position.z = startPosition[2];
   	scene.add(bodyBlock);
@@ -115,6 +115,35 @@ function createScene()
     console.log(body);
   	// bodyBlock.receiveShadow = true;
   }
+
+  var radius = STEP/2,
+		segments = 6,
+		rings = 6;
+
+	// // create the sphere's material
+	var sphereMaterial =
+	  new THREE.MeshLambertMaterial(
+		{
+		  color: 0xD43001
+		});
+
+	// Create a ball with sphere geometry
+	head = new THREE.Mesh(
+
+	  new THREE.SphereGeometry(
+		radius,
+		segments,
+		rings),
+
+	  sphereMaterial);
+
+	// // add the sphere to the scene
+	scene.add(head);
+
+	head.position.x = startPosition[0];
+	head.position.y = startPosition[1];
+	// set ball above the table surface
+	head.position.z = STEP/2;
 
   pointLight =
     new THREE.PointLight(0xF8D898);
