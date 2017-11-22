@@ -91,9 +91,41 @@ function headMovement()
 
 function bodyMovement()
 {
-	tail = body[body.length-1];
+	tail = body.pop();
 	tail.position.x = head.position.x;
 	tail.position.y = head.position.y;
 
+	body.unshift(tail);
 	tail.geometry.verticesNeedUpdate = true;
+}
+
+function updateCamera() {
+	if (headXSpeed == STEP) {
+		camera.position.x = head.position.x - STEP * 3;
+		camera.position.y = head.position.y;
+		camera.rotation.x = 0;
+		camera.rotation.y = -60 * Math.PI/180;
+		camera.rotation.z = -90 * Math.PI/180;
+	}
+	else if (headXSpeed == (-1) * STEP) {
+		camera.position.x = head.position.x + STEP * 3;
+		camera.position.y = head.position.y;
+		camera.rotation.x = 0;
+		camera.rotation.y = 60 * Math.PI/180;
+		camera.rotation.z = 90 * Math.PI/180;
+	}
+	else if (headYSpeed == STEP) {
+		camera.position.x = head.position.x;
+		camera.position.y = head.position.y - STEP * 3;
+		camera.rotation.x = 60 * Math.PI/180;
+		camera.rotation.y = 0;
+		camera.rotation.z = 0;
+	}
+	else if (headYSpeed == (-1) * STEP) {
+		camera.position.x = head.position.x;
+		camera.position.y = head.position.y + STEP * 3;
+		camera.rotation.x = -60 * Math.PI/180;
+		camera.rotation.y = 0;
+		camera.rotation.z = 180 * Math.PI/180;
+	}
 }

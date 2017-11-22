@@ -122,26 +122,6 @@ function createScene()
   console.log(scene);
 }
 
-function updateCamera() {
-  camera.position.x = head.position.x - STEP * 3;
-  camera.position.y = head.position.y;
-	camera.position.z = head.position.z + STEP * 5;
-
-	camera.rotation.y = -60 * Math.PI/180;
-  if (headXSpeed == STEP) {
-    camera.rotation.z = -90 * Math.PI/180;
-  }
-  else if (headXSpeed == (-1) * STEP) {
-    camera.rotation.z = 90 * Math.PI/180;
-  }
-  else if (headYSpeed == STEP) {
-    camera.rotation.z = 0;
-  }
-  else if (headYSpeed == (-1) * STEP) {
-    camera.rotation.z = 180 * Math.PI/180;
-  }
-}
-
 var fps = 30;
 var now;
 var then = Date.now();
@@ -150,33 +130,19 @@ var delta;
 
 function draw()
 {
-
-
 	requestAnimationFrame(draw);
 
-  now = Date.now();
-  delta = now - then;
+	now = Date.now();
+	delta = now - then;
 
-  if (delta > interval) {
-      // update time stuffs
+	if (delta > interval) {
 
-      // Just `then = now` is not enough.
-      // Lets say we set fps at 10 which means
-      // each frame must take 100ms
-      // Now frame executes in 16ms (60fps) so
-      // the loop iterates 7 times (16*7 = 112ms) until
-      // delta > interval === true
-      // Eventually this lowers down the FPS as
-      // 112*10 = 1120ms (NOT 1000ms).
-      // So we have to get rid of that extra 12ms
-      // by subtracting delta (112) % interval (100).
-      // Hope that makes sense.
+		then = now - (delta % interval);
+		delta = delta % interval;
 
-      then = now - (delta % interval);
-
-      renderer.render(scene, camera);
-    	bodyMovement();
-    	headMovement();
-      updateCamera();
-  }
+		renderer.render(scene, camera);
+		bodyMovement();
+		headMovement();
+		updateCamera();
+	}
 }
