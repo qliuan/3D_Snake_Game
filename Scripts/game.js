@@ -13,7 +13,6 @@ var headXSpeed = STEP, headYSpeed = 0;
 function setup()
 {
 	createScene();
-
 	draw();
 }
 
@@ -27,17 +26,12 @@ function createScene()
 	  NEAR = 0.1,
 	  FAR = 10000;
 
-	var c = document.getElementById("gameCanvas");
-
-	renderer = new THREE.WebGLRenderer();
 	camera =
 	  new THREE.PerspectiveCamera(
 		VIEW_ANGLE,
 		ASPECT,
 		NEAR,
 		FAR);
-
-	scene = new THREE.Scene();
 
   camera.position.x = startPosition[0] - STEP*3;
   camera.position.y = startPosition[1];
@@ -46,41 +40,36 @@ function createScene()
 	camera.rotation.y = -60 * Math.PI/180;
 	camera.rotation.z = -90 * Math.PI/180;
 
+  scene = new THREE.Scene();
   scene.add(camera);
 
+  renderer = new THREE.WebGLRenderer();
 	renderer.setSize(WIDTH, HEIGHT);
 
-	c.appendChild(renderer.domElement);
+	document.getElementById("gameCanvas").appendChild(renderer.domElement);
 
 	var	planeQuality = 10;
+  var planeMaterial =
+	  new THREE.MeshLambertMaterial(
+		{
+		  color: 0x4BD121
+		});
+  var plane = new THREE.Mesh(
+	  new THREE.PlaneGeometry(
+		planeWidth,
+		planeHeight,
+		planeQuality,
+		planeQuality),
+	  planeMaterial);
+	scene.add(plane);
 
   var snakeMaterial =
 	  new THREE.MeshLambertMaterial(
 		{
 		  color: 0x1B32C0
 		});
-
-  var planeMaterial =
-	  new THREE.MeshLambertMaterial(
-		{
-		  color: 0x4BD121
-		});
-
-  var plane = new THREE.Mesh(
-
-	  new THREE.PlaneGeometry(
-		planeWidth,
-		planeHeight,
-		planeQuality,
-		planeQuality),
-
-	  planeMaterial);
-
-	scene.add(plane);
-
   for (var i = 0; i < bodyLength; ++i) {
     var bodyBlock = new THREE.Mesh(
-
   	  new THREE.CubeGeometry(
   		STEP,
   		STEP,
@@ -88,7 +77,6 @@ function createScene()
   		1,
   		1,
   		1),
-
   	  snakeMaterial);
     bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
     bodyBlock.position.y = startPosition[1];
@@ -96,7 +84,6 @@ function createScene()
   	scene.add(bodyBlock);
 
     body.push(bodyBlock);
-    console.log(body);
   	// bodyBlock.receiveShadow = true;
   }
 
@@ -109,14 +96,11 @@ function createScene()
 		{
 		  color: 0xD43001
 		});
-
 	head = new THREE.Mesh(
-
 	  new THREE.SphereGeometry(
 		radius,
 		segments,
 		rings),
-
 	  sphereMaterial);
 
 	scene.add(head);
@@ -138,11 +122,61 @@ function createScene()
   console.log(scene);
 }
 
+function updateCamera() {
+  camera.position.x = head.position.x - STEP * 3;
+  camera.position.y = head.position.y;
+	camera.position.z = head.position.z + STEP * 5;
+
+	camera.rotation.y = -60 * Math.PI/180;
+  if (headXSpeed == STEP) {
+    camera.rotation.z = -90 * Math.PI/180;
+  }
+  else if (headXSpeed == (-1) * STEP) {
+    camera.rotation.z = 90 * Math.PI/180;
+  }
+  else if (headYSpeed == STEP) {
+    camera.rotation.z = 0;
+  }
+  else if (headYSpeed == (-1) * STEP) {
+    camera.rotation.z = 180 * Math.PI/180;
+  }
+}
+
+var fps = 30;
+var now;
+var then = Date.now();
+var interval = 1000/fps;
+var delta;
+
 function draw()
 {
-	renderer.render(scene, camera);
-	bodyMovement();
-	headMovement();
+
 
 	requestAnimationFrame(draw);
+
+  now = Date.now();
+  delta = now - then;
+
+  if (delta > interval) {
+      // update time stuffs
+
+      // Just `then = now` is not enough.
+      // Lets say we set fps at 10 which means
+      // each frame must take 100ms
+      // Now frame executes in 16ms (60fps) so
+      // the loop iterates 7 times (16*7 = 112ms) until
+      // delta > interval === true
+      // Eventually this lowers down the FPS as
+      // 112*10 = 1120ms (NOT 1000ms).
+      // So we have to get rid of that extra 12ms
+      // by subtracting delta (112) % interval (100).
+      // Hope that makes sense.
+
+      then = now - (delta % interval);
+
+      renderer.render(scene, camera);
+    	bodyMovement();
+    	headMovement();
+      updateCamera();
+  }
 }
