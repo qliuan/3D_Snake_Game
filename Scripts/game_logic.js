@@ -4,7 +4,7 @@
 // Handles the Movement of the Snake
 var neckX = 0, neckY = 0;
 var addBodyFlag = false;
-var pauseFlag = false;
+var pauseFlag = true;
 
 function headMovement()
 {

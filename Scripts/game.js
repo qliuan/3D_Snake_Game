@@ -13,13 +13,12 @@ var renderer, camera, scene;
 var WIDTH = 640,HEIGHT = 360;
 var VIEW_ANGLE = 90, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 10000;
 
-var plane;
-var head;
-var diamond;
+var plane, head, diamond;
 var body = [];
 var bodyLength = 5;
 
-var sun, lantern;
+var sun, headLantern, diamondLantern;
+
 
 var loader = new THREE.OBJLoader();
 
@@ -32,7 +31,7 @@ var	planeQuality = 10;
 var planeWidth = 1280;
 var planeHeight = 720;
 var planeMaterial =
-	new THREE.MeshLambertMaterial(
+	new THREE.MeshPhongMaterial(
 	{
 		color: 0x4BD121
 	});
@@ -98,6 +97,17 @@ function createHead()
 	head.castShadow = true;
 }
 
+// Create head lantern
+function createHeadLantern()
+{
+	headLantern = new THREE.PointLight(0xffffff);
+	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
+	headLantern.intensity = 2;
+	headLantern.distance = STEP * 500;
+	headLantern.decay = 2;
+
+}
+
 
 // Create diamond
 function createDiamond()
@@ -130,8 +140,33 @@ function createDiamond()
 
 }
 
+// Create diamond lantern
+function createDiamondLantern()
+{
+	/*diamondLantern = new THREE.SpotLight(0xffffff);
+	diamondLantern.position.set(diamond.position.x, diamond.position.y, diamond.position.z + STEP * 5);
+	diamondLantern.intensity = 5;
+	diamondLantern.castShadow = true;
+
+	diamondLantern.target = diamond;
+	diamondLantern.angle = Math.PI/6;*/
+
+	diamondLantern = new THREE.PointLight(0xffffff);
+	diamondLantern.position.set(diamond.position.x, diamond.position.y, diamond.position.z + STEP * 3);
+	diamondLantern.intensity = 1;
+	diamondLantern.distance = STEP * 300;
+	diamondLantern.decay = 2;
+}
+
 // Create sun
 var sunRadius = 5000;
+function createSun()
+{
+	sun = new THREE.SpotLight(0xffffff);
+	sun.position.set(0, -sunRadius, 0);
+	sun.intensity = 3;
+	sun.castShadow = true;
+}
 
 function setup()
 {
@@ -241,29 +276,27 @@ function createScene()
 	pointLight.distance = 10000;
 	scene.add(pointLight);*/
 
-	sun = new THREE.SpotLight(0xffffff);
-	sun.position.set(0, -sunRadius, 0);
-	sun.intensity = 3;
-	sun.castShadow = true;
+	createHeadLantern();
+	scene.add(headLantern);
+
+	createDiamondLantern();
+	scene.add(diamondLantern);
+
+	createSun();
 	scene.add(sun);
 
-	 lantern = new THREE.SpotLight(0xffffff);
-  lantern.position.set(startPosition[0], startPosition[1], startPosition[2] + STEP * 3);
-  lantern.intensity = 5;
-  lantern.castShadow = true;
-  scene.add(lantern);
-
-  // MAGIC SHADOW CREATOR DELUXE EDITION with Lights PackTM DLC
-  renderer.shadowMapEnabled = true;
+	// MAGIC SHADOW CREATOR DELUXE EDITION with Lights PackTM DLC
+	renderer.shadowMapEnabled = true;
 
 	console.log(scene);
 }
 
 function updateLight() {
-  sun.position.y = sunRadius * Math.sin(time/10);
-  sun.position.z = sunRadius * Math.cos(time/10);
+	sun.position.y = sunRadius * Math.sin(time/10);
+	sun.position.z = sunRadius * Math.cos(time/10);
 
-  lantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
+	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
+	diamondLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
 }
 
 var fps = 30 * difficulty;
