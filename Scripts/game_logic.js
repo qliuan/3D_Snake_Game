@@ -255,12 +255,12 @@ function checkEndingCondition()
 
 function gameWin()
 {
-	var flag = document.getElementById("debug");
-	flag.value = "WIN!!";
+	document.getElementById("scores").innerHTML = "WIN!!";
+	document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
 }
 
 function gameLose()
 {
-	var flag = document.getElementById("debug");
-	flag.value = "LOSE!!";
+	document.getElementById("scores").innerHTML = "LOSE!!";
+	document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
 }
