@@ -9,6 +9,8 @@ var Key = {
   D: 68,
   S: 83,
   SPACE: 32,
+  Left: 37,
+  Right: 39,
 
   isDown: function(keyCode) {
     var down = false;
@@ -21,7 +23,21 @@ var Key = {
   },
 
   onKeydown: function(event) {
-    this._pressed[event.keyCode] = true;
+    if (event.keyCode != 32)
+    {
+      this._pressed[event.keyCode] = true;
+    }
+    else
+    {
+      if (pauseFlag)
+      {
+        pauseFlag = false;
+      }
+      else
+      {
+        pauseFlag = true;
+      }
+    }
   },
 
   onKeyup: function(event) {
