@@ -167,7 +167,7 @@ function createScene()
 	scene.add(plane);
 
 
-	/*for (var i = 0; i < bodyLength; ++i) {
+	for (var i = 0; i < bodyLength; ++i) {
 		var bodyBlock = newBodyBlock();
 		bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
 		bodyBlock.position.y = startPosition[1];
@@ -175,9 +175,9 @@ function createScene()
 		scene.add(bodyBlock);
 
 		body.push(bodyBlock);
-	}*/
+	}
 
-	for (var i = 0; i < bodyLength; ++i) {
+	/*for (var i = 0; i < bodyLength; ++i) {
     // var bodyBlock = new THREE.Mesh(
   	//   new THREE.CubeGeometry(
   	// 	STEP,
@@ -215,7 +215,7 @@ function createScene()
     }
     );
 
-  }
+  }*/
 
 	createHead();
 	scene.add(head);
