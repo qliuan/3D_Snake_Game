@@ -1,11 +1,23 @@
+// TODO:
+// Galaxy, space theme
+
 // Handles the Movement of the Snake
+var neckX = 0, neckY = 0;
+var addBodyFlag = false;
+var pauseFlag = false;
+
 function headMovement()
 {
+	if (pauseFlag)
+	{
+		return;
+	}
+
 	// move left
 	if (Key.isDown(Key.A) || Key.isDown(Key.Left))
 	{
-		var flag = document.getElementById("debug");
-		flag.value = "left";
+		/*var flag = document.getElementById("debug");
+		flag.value = "left";*/
 
 		if (headXSpeed != 0)
 		{
@@ -41,9 +53,8 @@ function headMovement()
 	// move right
 	else if (Key.isDown(Key.D) || Key.isDown(Key.Right))
 	{
-		// window.alert("Moving Right");
-		var flag = document.getElementById("debug");
-		flag.value = "right";
+		/*var flag = document.getElementById("debug");
+		flag.value = "right";*/
 
 		if (headXSpeed != 0)
 		{
@@ -79,10 +90,12 @@ function headMovement()
 	// move forward
 	else
 	{
-		var flag = document.getElementById("debug");
-		flag.value = "forward";
+		/*var flag = document.getElementById("debug");
+		flag.value = "forward";*/
 	}
 
+	neckX = head.position.x;
+	neckY = head.position.y;
 	head.position.x += headXSpeed;
 	head.position.y += headYSpeed;
 
@@ -91,12 +104,23 @@ function headMovement()
 
 function bodyMovement()
 {
-	tail = body.pop();
-	tail.position.x = head.position.x;
-	tail.position.y = head.position.y;
+	if (pauseFlag)
+	{
+		return;
+	}
+	// Not adding the body
+	if (!addBodyFlag)
+	{
+		tail = body.pop();
+		tail.position.x = neckX;
+		tail.position.y = neckY;
 
-	body.unshift(tail);
-	tail.geometry.verticesNeedUpdate = true;
+		body.unshift(tail);
+		tail.geometry.verticesNeedUpdate = true;
+	}
+
+	// After adding the body
+	addBodyFlag = false;
 }
 
 function updateCamera() {
@@ -128,4 +152,115 @@ function updateCamera() {
 		camera.rotation.y = 0;
 		camera.rotation.z = 180 * Math.PI/180;
 	}
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function placeDiamond()
+{
+	var x = 0, y = 0, z = STEP/2;
+	var isValid = false;
+	while (!isValid)
+	{
+		// Set the random position
+		x = getRandomInt(-planeWidth/2, planeWidth/2);
+		y = getRandomInt(-planeHeight/2, planeHeight/2);
+		x -= x % STEP;
+		y -= y % STEP;
+
+		// Check whether it collides with other objects
+		if (head.position.x == x && head.position.y == y)
+		{
+			continue; // Get new random positions
+		}
+		for (var i=0; i<body.length; i++)
+		{
+			if (body[i].position.x == x && body[i].position.y == y)
+			{
+				continue; // Get new random positions
+			}
+		}
+
+		isValid = true;
+	}
+
+	diamond.position.x = x;
+	diamond.position.y = y;
+}
+
+function checkDiamond()
+{
+
+	if (head.position.x == diamond.position.x && head.position.y == diamond.position.y)
+	{
+		// replace the diamond
+		/*placeDiamond();*/
+		trickDiamond();
+		// increment the score
+		score += 1;
+		document.getElementById("scores").innerHTML = score;
+		addBodyFlag = true;
+		addBody();
+	}
+}
+
+
+function addBody()
+{
+	var newBody = newBodyBlock();
+	// bodyBlock.receiveShadow = true;
+	body.unshift(newBody);
+	scene.add(newBody);
+
+	newBody.position.x = neckX;
+	newBody.position.y = neckY;
+	newBody.position.z = STEP/2;
+}
+
+function trickDiamond()
+{
+	diamond.position.x = head.position.x + 20*STEP;
+	diamond.position.y = head.position.y;
+	diamond.position.z = head.position.z;
+}
+
+function checkEndingCondition()
+{
+	if (score >= MAX_SCORE)
+	{
+		WIN = true;
+		return;
+	}
+
+	var x = head.position.x, y = head.position.y;
+	if (x > planeWidth/2 || x < -planeWidth/2)
+	{
+		LOSE = true;
+	}
+	if (y > planeHeight/2 || y < -planeHeight/2)
+	{
+		LOSE = true;
+	}
+	for (var i=0; i<body.length; i++)
+	{
+		if (body[i].position.x == x && body[i].position.y == y)
+		{
+			LOSE = true;
+			break;
+		}
+	}
+}
+
+function gameWin()
+{
+	document.getElementById("scores").innerHTML = "WIN!!";
+	document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
+}
+
+function gameLose()
+{
+	document.getElementById("scores").innerHTML = "LOSE!!";
+	document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
 }
