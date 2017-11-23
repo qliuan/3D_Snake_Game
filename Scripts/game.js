@@ -1,17 +1,28 @@
 //----- GLOBAL VARIABLES -----//
+// Game variables
+var STEP = 3;
+
+var headXSpeed = STEP, headYSpeed = 0;
+var score = 0;
+var difficulty = 0.5; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
+var MAX_SCORE = 10;
+var WIN = false, LOSE = false;
+
 // Scene and objects
 var renderer, camera, scene;
 var WIDTH = 640,HEIGHT = 360;
 var VIEW_ANGLE = 90, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 10000;
 
-var STEP = 3;
+var plane;
 var head;
 var diamond;
 var body = [];
 var bodyLength = 5;
+
 var startPosition = [0, 0, STEP/2];
 
-var plane;
+
+// Create plane
 var	planeQuality = 10;
 var planeWidth = 1280;
 var planeHeight = 720;
@@ -21,12 +32,41 @@ var planeMaterial =
 		color: 0x4BD121
 	});
 
+function createPlane()
+{
+	plane = new THREE.Mesh(
+		new THREE.PlaneGeometry(
+		planeWidth,
+		planeHeight,
+		planeQuality,
+		planeQuality),
+		planeMaterial);
+}
+
+// Create body
 var bodyMaterial =
 	new THREE.MeshLambertMaterial(
 	{
 		color: 0x1B32C0
 	});
 
+
+function newBodyBlock()
+{
+	var bodyBlock = new THREE.Mesh(
+			new THREE.CubeGeometry(
+			STEP,
+			STEP,
+			STEP,
+			1,
+			1,
+			1),
+			bodyMaterial);
+
+	return bodyBlock;
+}
+
+// Create head
 var headRadius = STEP/2,
 	headSegments = 6,
 	headRings = 6;
@@ -37,23 +77,48 @@ var headMaterial =
 		color: 0xD43001
 	});
 
+function createHead()
+{
+	head = new THREE.Mesh(
+		new THREE.SphereGeometry(
+		headRadius,
+		headSegments,
+		headRings),
+		headMaterial);
+}
 
-var diamondRadius = STEP/2,
-	diamondSegments = 6,
-	diamondRings = 6;
 
-var diamondMaterial =
-	new THREE.MeshPhongMaterial(
-	{
-		color: 0xD43001
-	});
+// Create diamond
+function createDiamond()
+{
+	var diamondMaterial =
+		new THREE.MeshNormalMaterial({
+			shading: THREE.SmoothShading
+		});
 
+	var sphereRadius = STEP/2,
+		sphereSegments = 6,
+		sphereRings = 6;
+	var sphere = new THREE.Mesh(
+		new THREE.SphereGeometry(
+			sphereRadius,
+			sphereSegments,
+			sphereRings),
+			diamondMaterial);
+	sphere.position.z = STEP;
 
-// Game variables
-var headXSpeed = STEP, headYSpeed = 0;
-var score = 0;
-var MAX_SCORE = 10;
-var WIN = false, LOSE = false;
+	/*var sphereCsg = THREE.CSG.toCSG(sphere);*/
+
+	diamond = new THREE.Mesh( new THREE.CubeGeometry( STEP, STEP, STEP ), diamondMaterial );
+	/*var cubeCsg = THREE.CSG.toCSG(cubeMesh);*/
+
+	/*var diamondCsg = cubeCsg.union(sphereCsg);
+	diamond = THREE.CSG.fromCSG(diamondCsg);*/
+
+	/*THREE.GeometryUtils.merge(diamond, sphere);*/
+
+}
+
 
 function setup()
 {
@@ -85,26 +150,12 @@ function createScene()
 
 	document.getElementById("gameCanvas").appendChild(renderer.domElement);
 
-	plane = new THREE.Mesh(
-		new THREE.PlaneGeometry(
-		planeWidth,
-		planeHeight,
-		planeQuality,
-		planeQuality),
-		planeMaterial);
+	createPlane();
 	scene.add(plane);
 
 
 	for (var i = 0; i < bodyLength; ++i) {
-		var bodyBlock = new THREE.Mesh(
-			new THREE.CubeGeometry(
-			STEP,
-			STEP,
-			STEP,
-			1,
-			1,
-			1),
-			bodyMaterial);
+		var bodyBlock = newBodyBlock();
 		bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
 		bodyBlock.position.y = startPosition[1];
 		bodyBlock.position.z = startPosition[2];
@@ -113,31 +164,19 @@ function createScene()
 		body.push(bodyBlock);
 	}
 
-
-	head = new THREE.Mesh(
-		new THREE.SphereGeometry(
-		headRadius,
-		headSegments,
-		headRings),
-		headMaterial);
-
-	diamond = new THREE.Mesh(
-		new THREE.SphereGeometry(
-		diamondRadius,
-		diamondSegments,
-		diamondRings),
-		diamondMaterial);
-
-	/*placeDiamond();*/
-	trickDiamond();
-
-	scene.add(diamond);
-
+	createHead();
 	scene.add(head);
 
 	head.position.x = startPosition[0];
 	head.position.y = startPosition[1];
 	head.position.z = startPosition[2];
+
+	createDiamond();
+
+	/*placeDiamond();*/
+	trickDiamond();
+
+	scene.add(diamond);
 
 	pointLight =
 		new THREE.PointLight(0xF8D898);
@@ -153,7 +192,7 @@ function createScene()
 }
 
 
-var fps = 30;
+var fps = 30 * difficulty;
 var now;
 var then = Date.now();
 var interval = 1000/fps;

@@ -4,7 +4,6 @@
 // Handles the Movement of the Snake
 var neckX = 0, neckY = 0;
 var addBodyFlag = false;
-var newBody;
 var pauseFlag = false;
 
 function headMovement()
@@ -161,7 +160,7 @@ function getRandomInt(min, max) {
 
 function placeDiamond()
 {
-	var x = 0, y = 0, z = 0;
+	var x = 0, y = 0, z = STEP/2;
 	var isValid = false;
 	while (!isValid)
 	{
@@ -205,34 +204,26 @@ function checkDiamond()
 		addBodyFlag = true;
 		addBody();
 	}
-
 }
-
 
 
 function addBody()
 {
-	var newBody = new THREE.Mesh(
-			new THREE.CubeGeometry(
-			STEP,
-			STEP,
-			STEP,
-			1,
-			1,
-			1),
-			bodyMaterial);
+	var newBody = newBodyBlock();
 	// bodyBlock.receiveShadow = true;
 	body.unshift(newBody);
 	scene.add(newBody);
 
 	newBody.position.x = neckX;
 	newBody.position.y = neckY;
+	newBody.position.z = STEP/2;
 }
 
 function trickDiamond()
 {
 	diamond.position.x = head.position.x + 20*STEP;
 	diamond.position.y = head.position.y;
+	diamond.position.z = head.position.z;
 }
 
 function checkEndingCondition()
