@@ -1,16 +1,18 @@
+// TO-DO: poles, 
+
 //----- GLOBAL VARIABLES -----//
 // Game variables
-var STEP = 5;
+var STEP = 10;
 
 var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
-var difficulty = 0.5; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
+var difficulty = 1.0; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
 var MAX_SCORE = 10;
 var WIN = false, LOSE = false;
 
 // Scene and objects
 var renderer, camera, scene;
-var WIDTH = 640,HEIGHT = 360;
+var WIDTH = 960,HEIGHT = 540;
 var VIEW_ANGLE = 90, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 10000;
 
 var plane, head, diamond;
@@ -22,11 +24,31 @@ var sun, headLantern, diamondLantern;
 
 var startPosition = [0, 0, STEP/2];
 
+// Create camera
+function createCamera()
+{
+	camera =
+		new THREE.PerspectiveCamera(
+		VIEW_ANGLE,
+		ASPECT,
+		NEAR,
+		FAR);
+
+	camera.position.x = startPosition[0] - STEP*50;
+	camera.position.y = startPosition[1];
+	camera.position.z = startPosition[2] + STEP*3;
+	
+	camera.rotation.order = 'YXZ';
+
+	//camera.rotation.x = 0 * Math.PI/180;
+	camera.rotation.y = -60 * Math.PI/180;
+	//camera.rotation.z = -90 * Math.PI/180;
+}
 
 // Create plane
 var	planeQuality = 10;
-var planeWidth = 1280;
-var planeHeight = 720;
+var planeWidth = 100*STEP;
+var planeHeight = 50*STEP;
 var planeMaterial =
 	new THREE.MeshPhongMaterial(
 	{
@@ -111,7 +133,8 @@ function createDiamond()
 {
 	var diamondMaterial =
 		new THREE.MeshNormalMaterial({
-			shading: THREE.SmoothShading
+			shading: THREE.SmoothShading,
+			//map: new THREE.TextureLoader().load('texture.png')
 		});
 
 	var sphereRadius = STEP/2,
@@ -173,19 +196,7 @@ function setup()
 
 function createScene()
 {
-	camera =
-		new THREE.PerspectiveCamera(
-		VIEW_ANGLE,
-		ASPECT,
-		NEAR,
-		FAR);
-
-	camera.position.x = startPosition[0] - STEP*3;
-	camera.position.y = startPosition[1];
-	camera.position.z = startPosition[2] + STEP*5;
-
-	camera.rotation.y = -60 * Math.PI/180;
-	camera.rotation.z = -90 * Math.PI/180;
+	createCamera();
 
 	scene = new THREE.Scene();
 	scene.add(camera);
@@ -241,14 +252,14 @@ function createScene()
 }
 
 function updateLight() {
-	sun.position.y = sunRadius * Math.sin(time/10);
-	sun.position.z = sunRadius * Math.cos(time/10);
+	sun.position.y = sunRadius * Math.sin(time/30);
+	sun.position.z = sunRadius * Math.cos(time/30);
 
 	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
 	diamondLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
 }
 
-var fps = 30 * difficulty;
+var fps = 15 * difficulty;
 var now;
 var then = Date.now();
 var interval = 1000/fps;

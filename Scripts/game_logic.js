@@ -1,10 +1,10 @@
 // TODO:
-// Galaxy, space theme
 
 // Handles the Movement of the Snake
 var neckX = 0, neckY = 0;
 var addBodyFlag = false;
 var pauseFlag = true;
+var debug = false;
 
 function headMovement()
 {
@@ -196,8 +196,10 @@ function checkDiamond()
 	if (head.position.x == diamond.position.x && head.position.y == diamond.position.y)
 	{
 		// replace the diamond
-		/*placeDiamond();*/
-		trickDiamond();
+		if (!debug)
+		{ placeDiamond(); }
+		else 
+		{ trickDiamond(); }
 		// increment the score
 		score += 1;
 		document.getElementById("scores").innerHTML = score;

@@ -8,8 +8,8 @@
 			}
 			#gameCanvas {
 				background-color: black;
-				width: 640px;
-				height: 360px;
+				width: 960px;
+				height: 540px;
 				margin: auto;
 				align: center;
 			}
@@ -28,6 +28,13 @@
 				background-color: white;
 				color: black;
 			}
+			#winnerBoard {
+				color: white;
+			}
+			#instrucion {
+				color: white;
+			}
+			
 		</style>
 	</head>
 	<body onload='setup();'>
@@ -43,8 +50,9 @@
 			<h1 id='scores'>0</h1>
 			<h1 id='title'>3D Snake Game</h1>
 			<h2 id='winnerBoard'>10 diamonds to win!</h2>
-			<h3>A/<-- - move left
-			<br>D/--> - move right </h3>
+			<h3 id='instruction'>A/<-- - move left
+			<br>D/--> - move right 
+			<br>SpaceBar - pause</h3>
 		</div>
 	</body>
 </html>
