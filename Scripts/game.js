@@ -1,4 +1,4 @@
-// TO-DO: poles,
+
 
 //----- GLOBAL VARIABLES -----//
 // Game variables
@@ -8,7 +8,7 @@ var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
 var difficulty = 1.0; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
 var poleNum = Math.ceil(Math.pow(difficulty,4)*2);
-var MAX_SCORE = 10;
+var MAX_SCORE = 5;
 var WIN = false, LOSE = false;
 
 // Scene and objects
@@ -21,7 +21,7 @@ var body = [];
 var poles = [];
 var bodyLength = 5;
 
-var sun, headLantern, diamondLantern;
+var sun, headLantern, diamondLantern, ambientLight;;
 
 
 var startPosition = [0, 0, STEP/2];
@@ -51,11 +51,11 @@ function createCamera()
 var	planeQuality = 10;
 var planeWidth = 100*STEP;
 var planeHeight = 50*STEP;
-var planeMaterial =
+var planeMaterial; /*=
 	new THREE.MeshPhongMaterial(
 	{
 		color: 0x4BD121
-	});
+	});*/
 
 function createPlane()
 {
@@ -190,8 +190,18 @@ function createSun()
 	sun.castShadow = true;
 }
 
+// Create light
+function createAmbientLight() {
+	scene.background = new THREE.Color( 0xf2f7ff );
+	scene.fog = new THREE.Fog( 0xf2f7ff, 1, 25000 );
+	scene.add( new THREE.AmbientLight( 0xeef0ff ) );
 
-
+	ambientLight = new THREE.DirectionalLight(0xffffff, 0.3);
+	ambientLight.position.set(0, 0, sunRadius);
+	ambientLight.target = plane;
+	ambientLight.castShadow = true;
+	scene.add(ambientLight);
+}
 
 // Create poles
 
@@ -256,7 +266,16 @@ function newPole()
 }
 
 
-
+function loadTexture() {
+	var textureLoader = new THREE.TextureLoader();
+	var maxAnisotropy = renderer.getMaxAnisotropy();
+	var texture = textureLoader.load( "textures/crate.gif" );
+	/*var texture = textureLoader.load( "https://github.com/mrdoob/three.js/blob/master/examples/textures/crate.gif" );*/
+	planeMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, map: texture } );
+	texture.anisotropy = maxAnisotropy;
+	texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+	texture.repeat.set( 512, 512 );
+}
 
 
 function setup()
@@ -277,6 +296,8 @@ function createScene()
 	renderer.setSize(WIDTH, HEIGHT);
 
 	document.getElementById("gameCanvas").appendChild(renderer.domElement);
+
+	loadTexture();
 
 	createPlane();
 	scene.add(plane);
@@ -313,6 +334,8 @@ function createScene()
 
 	createSun();
 	scene.add(sun);
+
+	createAmbientLight();
 
 	for (var i = 0; i < poleNum; ++i) {
 		var pole = newPole();
