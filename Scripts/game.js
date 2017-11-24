@@ -1,6 +1,6 @@
 //----- GLOBAL VARIABLES -----//
 // Game variables
-var STEP = 3;
+var STEP = 5;
 
 var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
@@ -18,9 +18,6 @@ var body = [];
 var bodyLength = 5;
 
 var sun, headLantern, diamondLantern;
-
-
-var loader = new THREE.OBJLoader();
 
 
 var startPosition = [0, 0, STEP/2];
@@ -118,25 +115,25 @@ function createDiamond()
 		});
 
 	var sphereRadius = STEP/2,
-		sphereSegments = 6,
-		sphereRings = 6;
-	var sphere = new THREE.Mesh(
-		new THREE.SphereGeometry(
+		sphereSegments = 16,
+		sphereRings = 16;
+	var sphere = new THREE.SphereGeometry(
 			sphereRadius,
 			sphereSegments,
-			sphereRings),
-			diamondMaterial);
-	sphere.position.z = STEP;
+			sphereRings);
+	sphere.translate(0,0,STEP/2);
 
-	/*var sphereCsg = THREE.CSG.toCSG(sphere);*/
+	var sphereCsg = new ThreeBSP(sphere);
 
-	diamond = new THREE.Mesh( new THREE.CubeGeometry( STEP, STEP, STEP ), diamondMaterial );
-	/*var cubeCsg = THREE.CSG.toCSG(cubeMesh);*/
+	var cube = new THREE.CubeGeometry( STEP, STEP, STEP );
+	
+	var cubeCsg = new ThreeBSP(cube);
 
-	/*var diamondCsg = cubeCsg.union(sphereCsg);
-	diamond = THREE.CSG.fromCSG(diamondCsg);*/
+    var diamondCsg = cubeCsg.union(sphereCsg);
 
-	/*THREE.GeometryUtils.merge(diamond, sphere);*/
+	diamond = diamondCsg.toMesh(diamondMaterial);
+
+	//diamond.geometry.computeVertexNormals();
 
 }
 
@@ -212,45 +209,6 @@ function createScene()
 		body.push(bodyBlock);
 	}
 
-	/*for (var i = 0; i < bodyLength; ++i) {
-    // var bodyBlock = new THREE.Mesh(
-  	//   new THREE.CubeGeometry(
-  	// 	STEP,
-  	// 	STEP,
-  	// 	STEP,
-  	// 	1,
-  	// 	1,
-  	// 	1),
-  	//   snakeMaterial);
-    loader.load(
-    // resource URL
-    'data/cube_bumpy.obj',
-    // called when resource is loaded
-    function ( bodyBlock ) {
-      bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
-      bodyBlock.position.y = startPosition[1];
-    	bodyBlock.position.z = startPosition[2];
-    	scene.add(bodyBlock);
-
-      body.push(bodyBlock);
-    	bodyBlock.receiveShadow = true;
-      bodyBlock.castShadow = true;
-    },
-    // called when loading is in progresses
-    function ( xhr ) {
-
-      console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-    },
-    // called when loading has errors
-    function ( error ) {
-
-      console.log( 'An error happened' );
-
-    }
-    );
-
-  }*/
 
 	createHead();
 	scene.add(head);
@@ -266,15 +224,6 @@ function createScene()
 
 	scene.add(diamond);
 
-/*	pointLight =
-		new THREE.PointLight(0xF8D898);
-
-	pointLight.position.x = -1000;
-	pointLight.position.y = 0;
-	pointLight.position.z = 1000;
-	pointLight.intensity = 2.9;
-	pointLight.distance = 10000;
-	scene.add(pointLight);*/
 
 	createHeadLantern();
 	scene.add(headLantern);
