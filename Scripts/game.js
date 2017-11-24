@@ -1,4 +1,4 @@
-// TO-DO: poles, 
+// TO-DO: poles,
 
 //----- GLOBAL VARIABLES -----//
 // Game variables
@@ -7,13 +7,13 @@ var STEP = 10;
 var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
 var difficulty = 1.0; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
-var poleNum = Math.ceil(difficulty*5);
+var poleNum = Math.ceil(Math.pow(difficulty,4)*2);
 var MAX_SCORE = 10;
 var WIN = false, LOSE = false;
 
 // Scene and objects
 var renderer, camera, scene;
-var WIDTH = 960,HEIGHT = 540;
+var WIDTH = 800,HEIGHT = 450;
 var VIEW_ANGLE = 90, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 10000;
 
 var plane, head, diamond;
@@ -39,7 +39,7 @@ function createCamera()
 	camera.position.x = startPosition[0] - STEP*50;
 	camera.position.y = startPosition[1];
 	camera.position.z = startPosition[2] + STEP*3;
-	
+
 	camera.rotation.order = 'YXZ';
 
 	//camera.rotation.x = 0 * Math.PI/180;
@@ -151,7 +151,7 @@ function createDiamond()
 	var sphereCsg = new ThreeBSP(sphere);
 
 	var cube = new THREE.CubeGeometry( STEP, STEP, STEP );
-	
+
 	var cubeCsg = new ThreeBSP(cube);
 
     var diamondCsg = cubeCsg.union(sphereCsg);
@@ -231,12 +231,12 @@ function newPole()
 		{
 			continue; // Get new random positions
 		}
-		
+
 		if (diamond.position.x == x && diamond.position.y == y)
 		{
 			continue;
 		}
-		
+
 		for (var i=0; i<body.length; i++)
 		{
 			if (body[i].position.x == x && body[i].position.y == y)
