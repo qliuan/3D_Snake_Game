@@ -8,8 +8,8 @@
 			}
 			#gameCanvas {
 				background-color: black;
-				width: 640px;
-				height: 360px;
+				width: 800px;
+				height: 450px;
 				margin: auto;
 				align: center;
 			}
@@ -19,7 +19,7 @@
 				color: white;
 			}
 			#scores {
-				font-size:600%;
+				font-size:300%;
 				padding:0;
 				margin:0;
 				color: white;
@@ -28,24 +28,30 @@
 				background-color: white;
 				color: black;
 			}
+			#winnerBoard {
+				color: white;
+			}
+			#instrucion {
+				color: white;
+			}
+
 		</style>
 	</head>
 	<body onload='setup();'>
 		<div id='gameCanvas'></div>
 		<!-- <textarea id="debug">debug</textarea> -->
-		<script src='./Scripts/three.min.js'></script>
 		<script src='./Scripts/three.new.js'></script>
+		<script src='./Scripts/csg.js'></script>
+		<script src='./Scripts/ThreeCSG.js'></script>
 		<script src='./Scripts/keyboard.js'></script>
 		<script src='./Scripts/game_logic.js'></script>
-		<script src='./Scripts/OBJLoader.js'></script>
-		<script src='./Scripts/FileLoader.js'></script>
 		<script src='./Scripts/game.js'></script>
 		<div id='scoreboard'>
 			<h1 id='scores'>0</h1>
 			<h1 id='title'>3D Snake Game</h1>
 			<h2 id='winnerBoard'>10 diamonds to win!</h2>
-			<h3>A/<-- - move left
-			<br>D/--> - move right </h3>
+			<h3 id='instruction'>A/<-- - move left        D/--> - move right
+			<br>SpaceBar - pause</h3>
 		</div>
 	</body>
 </html>

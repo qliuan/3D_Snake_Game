@@ -1,38 +1,58 @@
+// TO-DO: poles,
+
 //----- GLOBAL VARIABLES -----//
 // Game variables
-var STEP = 3;
+var STEP = 10;
 
 var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
-var difficulty = 0.5; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
+var difficulty = 1.0; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
+var poleNum = Math.ceil(Math.pow(difficulty,4)*2);
 var MAX_SCORE = 10;
 var WIN = false, LOSE = false;
 
 // Scene and objects
 var renderer, camera, scene;
-var WIDTH = 640,HEIGHT = 360;
+var WIDTH = 800,HEIGHT = 450;
 var VIEW_ANGLE = 90, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 10000;
 
-var plane;
-var head;
-var diamond;
+var plane, head, diamond;
 var body = [];
+var poles = [];
 var bodyLength = 5;
 
-var sun, lantern;
-
-var loader = new THREE.OBJLoader();
+var sun, headLantern, diamondLantern;
 
 
 var startPosition = [0, 0, STEP/2];
 
+// Create camera
+function createCamera()
+{
+	camera =
+		new THREE.PerspectiveCamera(
+		VIEW_ANGLE,
+		ASPECT,
+		NEAR,
+		FAR);
+
+	camera.position.x = startPosition[0] - STEP*50;
+	camera.position.y = startPosition[1];
+	camera.position.z = startPosition[2] + STEP*3;
+
+	camera.rotation.order = 'YXZ';
+
+	//camera.rotation.x = 0 * Math.PI/180;
+	camera.rotation.y = -60 * Math.PI/180;
+	//camera.rotation.z = -90 * Math.PI/180;
+}
 
 // Create plane
 var	planeQuality = 10;
-var planeWidth = 1280;
-var planeHeight = 720;
+var planeWidth = 100*STEP;
+var planeHeight = 50*STEP;
 var planeMaterial =
-	new THREE.MeshLambertMaterial(
+	new THREE.MeshPhongMaterial(
 	{
 		color: 0x4BD121
 	});
@@ -98,40 +118,146 @@ function createHead()
 	head.castShadow = true;
 }
 
+// Create head lantern
+function createHeadLantern()
+{
+	headLantern = new THREE.PointLight(0xffffff);
+	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
+	headLantern.intensity = 2;
+	headLantern.distance = STEP * 500;
+	headLantern.decay = 2;
+
+}
+
 
 // Create diamond
 function createDiamond()
 {
 	var diamondMaterial =
 		new THREE.MeshNormalMaterial({
-			shading: THREE.SmoothShading
+			shading: THREE.SmoothShading,
+			//map: new THREE.TextureLoader().load('texture.png')
 		});
 
 	var sphereRadius = STEP/2,
-		sphereSegments = 6,
-		sphereRings = 6;
-	var sphere = new THREE.Mesh(
-		new THREE.SphereGeometry(
+		sphereSegments = 16,
+		sphereRings = 16;
+	var sphere = new THREE.SphereGeometry(
 			sphereRadius,
 			sphereSegments,
-			sphereRings),
-			diamondMaterial);
-	sphere.position.z = STEP;
+			sphereRings);
+	sphere.translate(0,0,STEP/2);
 
-	/*var sphereCsg = THREE.CSG.toCSG(sphere);*/
+	var sphereCsg = new ThreeBSP(sphere);
 
-	diamond = new THREE.Mesh( new THREE.CubeGeometry( STEP, STEP, STEP ), diamondMaterial );
-	/*var cubeCsg = THREE.CSG.toCSG(cubeMesh);*/
+	var cube = new THREE.CubeGeometry( STEP, STEP, STEP );
 
-	/*var diamondCsg = cubeCsg.union(sphereCsg);
-	diamond = THREE.CSG.fromCSG(diamondCsg);*/
+	var cubeCsg = new ThreeBSP(cube);
 
-	/*THREE.GeometryUtils.merge(diamond, sphere);*/
+    var diamondCsg = cubeCsg.union(sphereCsg);
 
+	diamond = diamondCsg.toMesh(diamondMaterial);
+
+	//diamond.geometry.computeVertexNormals();
+
+}
+
+// Create diamond lantern
+function createDiamondLantern()
+{
+	/*diamondLantern = new THREE.SpotLight(0xffffff);
+	diamondLantern.position.set(diamond.position.x, diamond.position.y, diamond.position.z + STEP * 5);
+	diamondLantern.intensity = 5;
+	diamondLantern.castShadow = true;
+
+	diamondLantern.target = diamond;
+	diamondLantern.angle = Math.PI/6;*/
+
+	diamondLantern = new THREE.PointLight(0xffffff);
+	diamondLantern.position.set(diamond.position.x, diamond.position.y, diamond.position.z + STEP * 3);
+	diamondLantern.intensity = 1;
+	diamondLantern.distance = STEP * 300;
+	diamondLantern.decay = 2;
 }
 
 // Create sun
 var sunRadius = 5000;
+function createSun()
+{
+	sun = new THREE.SpotLight(0xffffff);
+	sun.position.set(0, -sunRadius, 0);
+	sun.intensity = 3;
+	sun.castShadow = true;
+}
+
+
+
+
+// Create poles
+
+var polesMaterial =
+	new THREE.MeshLambertMaterial(
+	{
+		color: 0x1B32C0
+	});
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function newPole()
+{
+	var pole = new THREE.Mesh(
+			new THREE.CubeGeometry(
+			STEP,
+			STEP,
+			STEP,
+			1,
+			1,
+			1),
+			polesMaterial);
+	var x = 0, y = 0, z = STEP/2;
+	var isValid = false;
+	while (!isValid)
+	{
+		// Set the random position
+		x = getRandomInt(-planeWidth/2, planeWidth/2);
+		y = getRandomInt(-planeHeight/2, planeHeight/2);
+		x -= x % STEP;
+		y -= y % STEP;
+
+		// Check whether it collides with other objects
+		if (head.position.x == x && head.position.y == y)
+		{
+			continue; // Get new random positions
+		}
+
+		if (diamond.position.x == x && diamond.position.y == y)
+		{
+			continue;
+		}
+
+		for (var i=0; i<body.length; i++)
+		{
+			if (body[i].position.x == x && body[i].position.y == y)
+			{
+				continue; // Get new random positions
+			}
+		}
+
+		isValid = true;
+	}
+
+	pole.position.x = x;
+	pole.position.y = y;
+	pole.position.z = z;
+
+	return pole;
+}
+
+
+
+
 
 function setup()
 {
@@ -139,21 +265,10 @@ function setup()
 	draw();
 }
 
+
 function createScene()
 {
-	camera =
-		new THREE.PerspectiveCamera(
-		VIEW_ANGLE,
-		ASPECT,
-		NEAR,
-		FAR);
-
-	camera.position.x = startPosition[0] - STEP*3;
-	camera.position.y = startPosition[1];
-	camera.position.z = startPosition[2] + STEP*5;
-
-	camera.rotation.y = -60 * Math.PI/180;
-	camera.rotation.z = -90 * Math.PI/180;
+	createCamera();
 
 	scene = new THREE.Scene();
 	scene.add(camera);
@@ -166,7 +281,6 @@ function createScene()
 	createPlane();
 	scene.add(plane);
 
-
 	for (var i = 0; i < bodyLength; ++i) {
 		var bodyBlock = newBodyBlock();
 		bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
@@ -177,45 +291,6 @@ function createScene()
 		body.push(bodyBlock);
 	}
 
-	/*for (var i = 0; i < bodyLength; ++i) {
-    // var bodyBlock = new THREE.Mesh(
-  	//   new THREE.CubeGeometry(
-  	// 	STEP,
-  	// 	STEP,
-  	// 	STEP,
-  	// 	1,
-  	// 	1,
-  	// 	1),
-  	//   snakeMaterial);
-    loader.load(
-    // resource URL
-    'data/cube_bumpy.obj',
-    // called when resource is loaded
-    function ( bodyBlock ) {
-      bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
-      bodyBlock.position.y = startPosition[1];
-    	bodyBlock.position.z = startPosition[2];
-    	scene.add(bodyBlock);
-
-      body.push(bodyBlock);
-    	bodyBlock.receiveShadow = true;
-      bodyBlock.castShadow = true;
-    },
-    // called when loading is in progresses
-    function ( xhr ) {
-
-      console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-    },
-    // called when loading has errors
-    function ( error ) {
-
-      console.log( 'An error happened' );
-
-    }
-    );
-
-  }*/
 
 	createHead();
 	scene.add(head);
@@ -225,48 +300,41 @@ function createScene()
 	head.position.z = startPosition[2];
 
 	createDiamond();
-
-	/*placeDiamond();*/
-	trickDiamond();
+	placeDiamond();
 
 	scene.add(diamond);
 
-/*	pointLight =
-		new THREE.PointLight(0xF8D898);
 
-	pointLight.position.x = -1000;
-	pointLight.position.y = 0;
-	pointLight.position.z = 1000;
-	pointLight.intensity = 2.9;
-	pointLight.distance = 10000;
-	scene.add(pointLight);*/
+	createHeadLantern();
+	scene.add(headLantern);
 
-	sun = new THREE.SpotLight(0xffffff);
-	sun.position.set(0, -sunRadius, 0);
-	sun.intensity = 3;
-	sun.castShadow = true;
+	createDiamondLantern();
+	scene.add(diamondLantern);
+
+	createSun();
 	scene.add(sun);
 
-	 lantern = new THREE.SpotLight(0xffffff);
-  lantern.position.set(startPosition[0], startPosition[1], startPosition[2] + STEP * 3);
-  lantern.intensity = 5;
-  lantern.castShadow = true;
-  scene.add(lantern);
+	for (var i = 0; i < poleNum; ++i) {
+		var pole = newPole();
+		poles.push(pole);
+		scene.add(pole);
+	}
 
-  // MAGIC SHADOW CREATOR DELUXE EDITION with Lights PackTM DLC
-  renderer.shadowMapEnabled = true;
+	// MAGIC SHADOW CREATOR DELUXE EDITION with Lights PackTM DLC
+	renderer.shadowMapEnabled = true;
 
 	console.log(scene);
 }
 
 function updateLight() {
-  sun.position.y = sunRadius * Math.sin(time/10);
-  sun.position.z = sunRadius * Math.cos(time/10);
+	sun.position.y = sunRadius * Math.sin(time/30);
+	sun.position.z = sunRadius * Math.cos(time/30);
 
-  lantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
+	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
+	diamondLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
 }
 
-var fps = 30 * difficulty;
+var fps = 15 * difficulty;
 var now;
 var then = Date.now();
 var interval = 1000/fps;
