@@ -7,6 +7,7 @@ var STEP = 10;
 var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
 var difficulty = 1.0; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
+var poleNum = Math.ceil(difficulty*5);
 var MAX_SCORE = 10;
 var WIN = false, LOSE = false;
 
@@ -17,6 +18,7 @@ var VIEW_ANGLE = 90, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 10000;
 
 var plane, head, diamond;
 var body = [];
+var poles = [];
 var bodyLength = 5;
 
 var sun, headLantern, diamondLantern;
@@ -188,11 +190,81 @@ function createSun()
 	sun.castShadow = true;
 }
 
+
+
+
+// Create poles
+
+var polesMaterial =
+	new THREE.MeshLambertMaterial(
+	{
+		color: 0x1B32C0
+	});
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function newPole()
+{
+	var pole = new THREE.Mesh(
+			new THREE.CubeGeometry(
+			STEP,
+			STEP,
+			STEP,
+			1,
+			1,
+			1),
+			polesMaterial);
+	var x = 0, y = 0, z = STEP/2;
+	var isValid = false;
+	while (!isValid)
+	{
+		// Set the random position
+		x = getRandomInt(-planeWidth/2, planeWidth/2);
+		y = getRandomInt(-planeHeight/2, planeHeight/2);
+		x -= x % STEP;
+		y -= y % STEP;
+
+		// Check whether it collides with other objects
+		if (head.position.x == x && head.position.y == y)
+		{
+			continue; // Get new random positions
+		}
+		
+		if (diamond.position.x == x && diamond.position.y == y)
+		{
+			continue;
+		}
+		
+		for (var i=0; i<body.length; i++)
+		{
+			if (body[i].position.x == x && body[i].position.y == y)
+			{
+				continue; // Get new random positions
+			}
+		}
+
+		isValid = true;
+	}
+
+	pole.position.x = x;
+	pole.position.y = y;
+	pole.position.z = z;
+
+	return pole;
+}
+
+
+
+
+
 function setup()
 {
 	createScene();
 	draw();
 }
+
 
 function createScene()
 {
@@ -208,7 +280,6 @@ function createScene()
 
 	createPlane();
 	scene.add(plane);
-
 
 	for (var i = 0; i < bodyLength; ++i) {
 		var bodyBlock = newBodyBlock();
@@ -229,9 +300,7 @@ function createScene()
 	head.position.z = startPosition[2];
 
 	createDiamond();
-
-	/*placeDiamond();*/
-	trickDiamond();
+	placeDiamond();
 
 	scene.add(diamond);
 
@@ -244,6 +313,12 @@ function createScene()
 
 	createSun();
 	scene.add(sun);
+
+	for (var i = 0; i < poleNum; ++i) {
+		var pole = newPole();
+		poles.push(pole);
+		scene.add(pole);
+	}
 
 	// MAGIC SHADOW CREATOR DELUXE EDITION with Lights PackTM DLC
 	renderer.shadowMapEnabled = true;

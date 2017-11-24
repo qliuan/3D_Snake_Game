@@ -154,12 +154,15 @@ function updateCamera() {
 	}
 }
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 function placeDiamond()
 {
+	if (debug)
+	{
+		trickDiamond();
+		return;
+	}
+	
 	var x = 0, y = 0, z = STEP/2;
 	var isValid = false;
 	while (!isValid)
@@ -196,10 +199,8 @@ function checkDiamond()
 	if (head.position.x == diamond.position.x && head.position.y == diamond.position.y)
 	{
 		// replace the diamond
-		if (!debug)
-		{ placeDiamond(); }
-		else 
-		{ trickDiamond(); }
+		placeDiamond();
+
 		// increment the score
 		score += 1;
 		document.getElementById("scores").innerHTML = score;
@@ -248,6 +249,14 @@ function checkEndingCondition()
 	for (var i=0; i<body.length; i++)
 	{
 		if (body[i].position.x == x && body[i].position.y == y)
+		{
+			LOSE = true;
+			break;
+		}
+	}
+	for (var i=0; i<poles.length; i++)
+	{
+		if (poles[i].position.x == x && poles[i].position.y == y)
 		{
 			LOSE = true;
 			break;
