@@ -162,7 +162,7 @@ function placeDiamond()
 		trickDiamond();
 		return;
 	}
-	
+
 	var x = 0, y = 0, z = STEP/2;
 	var isValid = false;
 	while (!isValid)
@@ -191,6 +191,16 @@ function placeDiamond()
 
 	diamond.position.x = x;
 	diamond.position.y = y;
+
+}
+
+
+function trickDiamond()
+{
+	diamond.position.x = head.position.x + 20*STEP;
+	diamond.position.y = head.position.y;
+	diamond.position.z = head.position.z;
+
 }
 
 function checkDiamond()
@@ -222,12 +232,6 @@ function addBody()
 	newBody.position.z = STEP/2;
 }
 
-function trickDiamond()
-{
-	diamond.position.x = head.position.x + 20*STEP;
-	diamond.position.y = head.position.y;
-	diamond.position.z = head.position.z;
-}
 
 function checkEndingCondition()
 {

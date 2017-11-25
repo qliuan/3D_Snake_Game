@@ -1,5 +1,3 @@
-
-
 //----- GLOBAL VARIABLES -----//
 // Game variables
 var STEP = 10;
@@ -8,7 +6,7 @@ var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
 var difficulty = 1.0; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
 var poleNum = Math.ceil(Math.pow(difficulty,4)*2);
-var MAX_SCORE = 5;
+var MAX_SCORE = Math.ceil(5*difficulty);
 var WIN = false, LOSE = false;
 
 // Scene and objects
@@ -51,11 +49,7 @@ function createCamera()
 var	planeQuality = 10;
 var planeWidth = 100*STEP;
 var planeHeight = 50*STEP;
-var planeMaterial; /*=
-	new THREE.MeshPhongMaterial(
-	{
-		color: 0x4BD121
-	});*/
+var planeMaterial;
 
 function createPlane()
 {
@@ -73,60 +67,93 @@ function createPlane()
 
 // Create body
 var bodyMaterial =
-	new THREE.MeshLambertMaterial(
-	{
-		color: 0x1B32C0
-	});
+	new THREE.MeshStandardMaterial( {
+	    color: 0x8ec0f2,
+	    roughness: 0.10,
+	    metalness: 0.60,
+	} );
 
 
 function newBodyBlock()
 {
-	var bodyBlock = new THREE.Mesh(
-			new THREE.CubeGeometry(
-			STEP,
-			STEP,
-			STEP,
-			1,
-			1,
-			1),
-			bodyMaterial);
+	var cube = new THREE.CubeGeometry( STEP, STEP, STEP);
+
+	var bodyBlockCsg = new ThreeBSP(cube);
+
+	var boxScale = STEP/4;
+	var trans = STEP/2 - boxScale/2;
+	var boxPos = [ [trans, trans, 0], [trans, -trans, 0],
+					[-trans, trans, 0], [-trans, -trans, 0]]
+	for (var i=0; i<4; i++)
+	{
+		var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
+		box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
+		var boxCsg = new ThreeBSP(box);
+		bodyBlockCsg = bodyBlockCsg.subtract(boxCsg);
+	}
+
+	bodyBlock = bodyBlockCsg.toMesh(bodyMaterial);
+	bodyBlock.receiveShadow = true;
+	bodyBlock.castShadow = true;
 
 	return bodyBlock;
 }
 
 // Create head
 var headRadius = STEP/2,
-	headSegments = 6,
-	headRings = 6;
+	headSegments = 32,
+	headRings = 32;
 
 var headMaterial =
-	new THREE.MeshLambertMaterial(
-	{
-		color: 0xD43001
-	});
+	new THREE.MeshStandardMaterial( {
+	    /*color: 0x8ec0f2,
+	    roughness: 0.42,
+	    metalness: 0.37,*/
+	    color: 0x8ec0f2,
+	    roughness: 0.10,
+	    metalness: 0.60,
+	} );
 
 function createHead()
 {
-	head = new THREE.Mesh(
-		new THREE.SphereGeometry(
-		headRadius,
-		headSegments,
-		headRings),
-		headMaterial);
+	var cube = new THREE.CubeGeometry(STEP, STEP, STEP);
+	var headCsg = new ThreeBSP(cube);
 
+	var boxScale = STEP/4;
+	var trans = STEP/2 - boxScale/2;
+	var boxPos = [ [-trans, trans, 0], [-trans, -trans, 0] ];
+	for (var i=0; i<2; i++)
+	{
+		var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
+		box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
+		var boxCsg = new ThreeBSP(box);
+		headCsg = headCsg.subtract(boxCsg);
+	}
+
+	var cylinder = new THREE.CylinderGeometry(STEP/8, STEP/8, STEP/2, 32);
+	cylinder.translate(0*STEP/4,-4*STEP/4,0*STEP);
+	cylinder.rotateX(-90 * Math.PI/180);
+	var cylinderCsg = new ThreeBSP(cylinder);
+
+	var eye = new THREE.SphereGeometry(STEP/4, 32, 32);
+	eye.translate(0*STEP/4,0*STEP/4,5*STEP/4);
+	eyeCsg = new ThreeBSP(eye);
+
+	headCsg = headCsg.union(cylinderCsg);
+	headCsg = headCsg.union(eyeCsg);
+
+	/*cylinder.translate(0,-STEP/2,0);
+	cylinderCsg = new ThreeBSP(cylinderCsg);
+
+	eye.translate(0,-STEP/2,0);
+	eyeCsg = new ThreeBSP(eyeCsg);
+
+	headCsg = headCsg.union(cylinderCsg);
+	headCsg = headCsg.union(eyeCsg);*/
+
+	head = headCsg.toMesh(headMaterial);
 	head.receiveShadow = true;
 	head.castShadow = true;
-}
-
-// Create head lantern
-function createHeadLantern()
-{
-	headLantern = new THREE.PointLight(0xffffff);
-	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
-	headLantern.intensity = 2;
-	headLantern.distance = STEP * 500;
-	headLantern.decay = 2;
-
 }
 
 
@@ -134,31 +161,37 @@ function createHeadLantern()
 function createDiamond()
 {
 	var diamondMaterial =
-		new THREE.MeshNormalMaterial({
-			shading: THREE.SmoothShading,
-			//map: new THREE.TextureLoader().load('texture.png')
-		});
+	new THREE.MeshNormalMaterial({
+   shading: THREE.SmoothShading,
+   //map: new THREE.TextureLoader().load('texture.png')
+  });
+ var geometry1 = new THREE.CylinderGeometry( 1, STEP, STEP, 4 );
+ var geometry2 = new THREE.CylinderGeometry( 1, STEP, STEP, 4 );
 
-	var sphereRadius = STEP/2,
-		sphereSegments = 16,
-		sphereRings = 16;
-	var sphere = new THREE.SphereGeometry(
-			sphereRadius,
-			sphereSegments,
-			sphereRings);
-	sphere.translate(0,0,STEP/2);
+ geometry2.translate(0, STEP, 0);
 
-	var sphereCsg = new ThreeBSP(sphere);
+ geometry2.rotateX(180 * Math.PI/180);
 
-	var cube = new THREE.CubeGeometry( STEP, STEP, STEP );
+ var cylinder1 = new ThreeBSP(geometry1);
+ var cylinder2 = new ThreeBSP(geometry2);
 
-	var cubeCsg = new ThreeBSP(cube);
+  var cylinder = cylinder1.union(cylinder2);
 
-    var diamondCsg = cubeCsg.union(sphereCsg);
+ diamond = cylinder.toMesh(diamondMaterial);
 
-	diamond = diamondCsg.toMesh(diamondMaterial);
+ diamond.rotation.x = 90 * Math.PI/180;
+ diamond.position.z += STEP * 4;
 
-	//diamond.geometry.computeVertexNormals();
+}
+
+
+// Create head lantern
+function createHeadLantern()
+{
+	headLantern = new THREE.DirectionalLight(0xffffff);
+	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
+	headLantern.intensity = 3;
+	headLantern.castShadow = true;
 
 }
 
@@ -175,28 +208,30 @@ function createDiamondLantern()
 
 	diamondLantern = new THREE.PointLight(0xffffff);
 	diamondLantern.position.set(diamond.position.x, diamond.position.y, diamond.position.z + STEP * 3);
-	diamondLantern.intensity = 1;
+	diamondLantern.intensity = 0.25;
 	diamondLantern.distance = STEP * 300;
 	diamondLantern.decay = 2;
+
+	diamondLantern.castShadow = true;
 }
 
 // Create sun
 var sunRadius = 5000;
 function createSun()
 {
-	sun = new THREE.SpotLight(0xffffff);
+	sun = new THREE.SpotLight(0xe2ec4a);
 	sun.position.set(0, -sunRadius, 0);
-	sun.intensity = 3;
+	sun.intensity = 1.0;
 	sun.castShadow = true;
 }
 
 // Create light
 function createAmbientLight() {
-	scene.background = new THREE.Color( 0xf2f7ff );
+	scene.background = new THREE.Color( 0xaaaaaa );
 	scene.fog = new THREE.Fog( 0xf2f7ff, 1, 25000 );
-	scene.add( new THREE.AmbientLight( 0xeef0ff ) );
+	scene.add( new THREE.AmbientLight( 0x47484c ) );
 
-	ambientLight = new THREE.DirectionalLight(0xffffff, 0.3);
+	ambientLight = new THREE.DirectionalLight(0xe2ec4a, 0.1);
 	ambientLight.position.set(0, 0, sunRadius);
 	ambientLight.target = plane;
 	ambientLight.castShadow = true;
@@ -204,12 +239,8 @@ function createAmbientLight() {
 }
 
 // Create poles
-
-var polesMaterial =
-	new THREE.MeshLambertMaterial(
-	{
-		color: 0x1B32C0
-	});
+var polesTexture;
+var polesMaterial;
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -218,14 +249,9 @@ function getRandomInt(min, max) {
 function newPole()
 {
 	var pole = new THREE.Mesh(
-			new THREE.CubeGeometry(
-			STEP,
-			STEP,
-			STEP,
-			1,
-			1,
-			1),
+			new THREE.CylinderGeometry( STEP/2, STEP/2, 20*STEP, 32),
 			polesMaterial);
+
 	var x = 0, y = 0, z = STEP/2;
 	var isValid = false;
 	while (!isValid)
@@ -262,6 +288,11 @@ function newPole()
 	pole.position.y = y;
 	pole.position.z = z;
 
+	pole.rotation.x = -90 * Math.PI/180;
+
+	pole.receiveShadow = true;
+	pole.castShadow = true;
+
 	return pole;
 }
 
@@ -269,12 +300,24 @@ function newPole()
 function loadTexture() {
 	var textureLoader = new THREE.TextureLoader();
 	var maxAnisotropy = renderer.getMaxAnisotropy();
-	var texture = textureLoader.load( "textures/crate.gif" );
+	var texture = textureLoader.load( "textures/brick_diffuse.jpg" );
 	/*var texture = textureLoader.load( "https://github.com/mrdoob/three.js/blob/master/examples/textures/crate.gif" );*/
 	planeMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, map: texture } );
 	texture.anisotropy = maxAnisotropy;
 	texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-	texture.repeat.set( 512, 512 );
+	texture.repeat.set( 10, 10 );
+
+
+	polesTexture = textureLoader.load( "textures/rock.jpg" );
+	polesMaterial =
+	new THREE.MeshPhongMaterial(
+	{
+		color: 0xffffff,
+		map: polesTexture
+	});
+	polesTexture.anisotropy = maxAnisotropy;
+	polesTexture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+	polesTexture.repeat.set(5, 1);
 }
 
 
@@ -296,6 +339,7 @@ function createScene()
 	renderer.setSize(WIDTH, HEIGHT);
 
 	document.getElementById("gameCanvas").appendChild(renderer.domElement);
+
 
 	loadTexture();
 
@@ -321,16 +365,15 @@ function createScene()
 	head.position.z = startPosition[2];
 
 	createDiamond();
-	placeDiamond();
+	trickDiamond();
 
 	scene.add(diamond);
-
 
 	createHeadLantern();
 	scene.add(headLantern);
 
 	createDiamondLantern();
-	scene.add(diamondLantern);
+	/*scene.add(diamondLantern);*/
 
 	createSun();
 	scene.add(sun);
@@ -383,6 +426,8 @@ function draw()
 			headMovement();
 			checkDiamond();
 			bodyMovement();
+			headLantern.target = diamond;
+			diamond.rotation.y += 0.1;
 			updateCamera();
 			updateLight();
 			time++;
