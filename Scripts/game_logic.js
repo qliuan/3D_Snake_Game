@@ -111,7 +111,7 @@ function bodyMovement()
 	// Not adding the body
 	if (!addBodyFlag)
 	{
-		tail = body.pop();
+		var tail = body.pop();
 		tail.position.x = neckX;
 		tail.position.y = neckY;
 
@@ -199,13 +199,10 @@ function trickDiamond()
 {
 	diamond.position.x = head.position.x + 20*STEP;
 	diamond.position.y = head.position.y;
-	diamond.position.z = head.position.z;
-
 }
 
 function checkDiamond()
 {
-
 	if (head.position.x == diamond.position.x && head.position.y == diamond.position.y)
 	{
 		// replace the diamond
@@ -217,6 +214,10 @@ function checkDiamond()
 		addBodyFlag = true;
 		addBody();
 	}
+
+	var remain = MAX_SCORE - score;
+	document.getElementById("winnerBoard").innerHTML = remain + " more diamonds to win";
+	document.getElementById("difficulty").innerHTML = "difficulty: " + difficulty;
 }
 
 
@@ -271,11 +272,22 @@ function checkEndingCondition()
 function gameWin()
 {
 	document.getElementById("scores").innerHTML = "WIN!!";
-	document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
+	document.getElementById("winnerBoard").innerHTML = "Press 'Enter' to refresh to play again";
 }
 
 function gameLose()
 {
 	document.getElementById("scores").innerHTML = "LOSE!!";
-	document.getElementById("winnerBoard").innerHTML = "Refresh to play again";
+	document.getElementById("winnerBoard").innerHTML = "Press 'Enter' to refresh to play again";
+}
+
+function restart()
+{
+	if (WIN || LOSE)
+	{
+		if (Key.isDown(Key.Enter))
+		{
+			window.location.reload();
+		}
+	}
 }

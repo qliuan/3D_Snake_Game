@@ -31,7 +31,8 @@
 			}
 			#winnerBoard {
 				color: white;
-			}
+			}planeWidth = 1024;//100*STEP;
+var planeHeight = 1024
 			#instrucion {
 				color: white;
 			}
@@ -46,11 +47,14 @@
 		<script src='./Scripts/ThreeCSG.js'></script>
 		<script src='./Scripts/keyboard.js'></script>
 		<script src='./Scripts/game_logic.js'></script>
+		<script src='./Scripts/FileLoader.js'></script>
+		<script src='./Scripts/OBJLoader.js'></script>
 		<script src='./Scripts/game.js'></script>
 		<div id='scoreboard'>
-			<h1 id='scores'>0</h1>
-			<h1 id='title'>3D Snake Game</h1>
-			<h2 id='winnerBoard'>5 diamonds to win!</h2>
+			<h2 id='scores'>0</h2>
+			<h2 id='title'>3D Snake Game</h2>
+			<h3 id='winnerBoard'>5 diamonds to win!</h3>
+			<h3 id='difficulty'>difficulty: </h3>
 			<h3 id='instruction'>SpaceBar - start/pause
 			<br>A/<-- - move left        D/--> - move right</h3>
 		</div>

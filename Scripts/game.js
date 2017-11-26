@@ -14,7 +14,8 @@ var renderer, camera, scene;
 var WIDTH = 800,HEIGHT = 450;
 var VIEW_ANGLE = 90, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 10000;
 
-var plane, head, diamond;
+var groundPlane, PXplane, NXplane, PYplane, NYplane, PZplane;
+var head, diamond;
 var body = [];
 var poles = [];
 var bodyLength = 5;
@@ -34,35 +35,113 @@ function createCamera()
 		NEAR,
 		FAR);
 
-	camera.position.x = startPosition[0] - STEP*50;
+	camera.position.x = startPosition[0] - STEP*5;
 	camera.position.y = startPosition[1];
-	camera.position.z = startPosition[2] + STEP*3;
+	camera.position.z = startPosition[2] + STEP*4;
 
 	camera.rotation.order = 'YXZ';
 
-	//camera.rotation.x = 0 * Math.PI/180;
-	camera.rotation.y = -60 * Math.PI/180;
-	//camera.rotation.z = -90 * Math.PI/180;
+	camera.rotation.y = -120 * Math.PI/180;
+	camera.rotation.z = -90 * Math.PI/180;
 }
 
 // Create plane
 var	planeQuality = 10;
-var planeWidth = 100*STEP;
-var planeHeight = 50*STEP;
-var planeMaterial;
+var planeWidth = 1024;//100*STEP;
+var planeHeight = 1024;//50*STEP;
+var groundPlaneMaterial, PXplaneMaterial, NXplaneMaterial, PYplaneMaterial, NYplaneMaterial, PZplaneMaterial;
 
 function createPlane()
 {
-	plane = new THREE.Mesh(
+	groundPlane = new THREE.Mesh(
 		new THREE.PlaneGeometry(
 		planeWidth,
 		planeHeight,
 		planeQuality,
 		planeQuality),
-		planeMaterial);
+		groundPlaneMaterial);
 
-	plane.receiveShadow = true;
-	plane.castShadow = true;
+	groundPlane.receiveShadow = true;
+	groundPlane.castShadow = true;
+
+	PXplane = new THREE.Mesh(
+		new THREE.PlaneGeometry(
+		planeWidth,
+		planeHeight/2,
+		planeQuality,
+		planeQuality),
+		PXplaneMaterial);
+
+	PXplane.rotation.x = 90 * Math.PI/180;
+	PXplane.rotation.y = -90 * Math.PI/180;
+	PXplane.position.x = planeWidth / 2;
+	PXplane.position.z = planeHeight / 32;
+
+	PXplane.receiveShadow = true;
+	PXplane.castShadow = true;
+
+	NXplane = new THREE.Mesh(
+		new THREE.PlaneGeometry(
+		planeWidth,
+		planeHeight/2,
+		planeQuality,
+		planeQuality),
+		NXplaneMaterial);
+
+	NXplane.rotation.x = 90 * Math.PI/180;
+	NXplane.rotation.y = 90 * Math.PI/180;
+	NXplane.position.x = -planeWidth / 2;
+	NXplane.position.z = planeHeight / 32;
+
+	NXplane.receiveShadow = true;
+	NXplane.castShadow = true;
+
+	PYplane = new THREE.Mesh(
+		new THREE.PlaneGeometry(
+		planeWidth,
+		planeHeight/2,
+		planeQuality,
+		planeQuality),
+		PYplaneMaterial);
+
+	PYplane.rotation.x = 90 * Math.PI/180;
+	PYplane.position.y = planeHeight / 2;
+	PYplane.position.z = planeHeight / 32;
+
+	PYplane.receiveShadow = true;
+	PYplane.castShadow = true;
+
+	NYplane = new THREE.Mesh(
+		new THREE.PlaneGeometry(
+		planeWidth,
+		planeHeight/2,
+		planeQuality,
+		planeQuality),
+		NYplaneMaterial);
+
+	NYplane.rotation.x = 90 * Math.PI/180;
+	NYplane.rotation.y = 180 * Math.PI/180;
+	NYplane.position.y = -planeHeight / 2;
+	NYplane.position.z = planeHeight / 32;
+
+	NYplane.receiveShadow = true;
+	NYplane.castShadow = true;
+
+	PZplane = new THREE.Mesh(
+		new THREE.PlaneGeometry(
+		planeWidth,
+		planeHeight,
+		planeQuality,
+		planeQuality),
+		PZplaneMaterial);
+
+	PZplane.rotation.x = 180 * Math.PI/180;
+	// PZplane.rotation.z = 180 * Math.PI/180;
+	PZplane.position.z = planeHeight / 4;
+
+	// PZplane.receiveShadow = true;
+	// PZplane.castShadow = true;
+
 }
 
 // Create body
@@ -160,11 +239,6 @@ function createHead()
 // Create diamond
 function createDiamond()
 {
-	var diamondMaterial =
-	new THREE.MeshNormalMaterial({
-   shading: THREE.SmoothShading,
-   //map: new THREE.TextureLoader().load('texture.png')
-  });
  var geometry1 = new THREE.CylinderGeometry( 1, STEP, STEP, 4 );
  var geometry2 = new THREE.CylinderGeometry( 1, STEP, STEP, 4 );
 
@@ -180,7 +254,7 @@ function createDiamond()
  diamond = cylinder.toMesh(diamondMaterial);
 
  diamond.rotation.x = 90 * Math.PI/180;
- diamond.position.z += STEP * 4;
+ diamond.position.z = STEP * 2;
 
 }
 
@@ -188,9 +262,9 @@ function createDiamond()
 // Create head lantern
 function createHeadLantern()
 {
-	headLantern = new THREE.DirectionalLight(0xffffff);
+	headLantern = new THREE.PointLight(0xffffff);
 	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
-	headLantern.intensity = 3;
+	headLantern.intensity = 1; //3
 	headLantern.castShadow = true;
 
 }
@@ -216,7 +290,7 @@ function createDiamondLantern()
 }
 
 // Create sun
-var sunRadius = 5000;
+var sunRadius = 500;
 function createSun()
 {
 	sun = new THREE.SpotLight(0xe2ec4a);
@@ -233,7 +307,7 @@ function createAmbientLight() {
 
 	ambientLight = new THREE.DirectionalLight(0xe2ec4a, 0.1);
 	ambientLight.position.set(0, 0, sunRadius);
-	ambientLight.target = plane;
+	ambientLight.target = groundPlane;
 	ambientLight.castShadow = true;
 	scene.add(ambientLight);
 }
@@ -241,6 +315,8 @@ function createAmbientLight() {
 // Create poles
 var polesTexture;
 var polesMaterial;
+var diamondTexture;
+var diamondMaterial;
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -300,13 +376,44 @@ function newPole()
 function loadTexture() {
 	var textureLoader = new THREE.TextureLoader();
 	var maxAnisotropy = renderer.getMaxAnisotropy();
-	var texture = textureLoader.load( "textures/brick_diffuse.jpg" );
+	var groundTexture = textureLoader.load( "textures/planes/nz.jpg" );
 	/*var texture = textureLoader.load( "https://github.com/mrdoob/three.js/blob/master/examples/textures/crate.gif" );*/
-	planeMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff, map: texture } );
-	texture.anisotropy = maxAnisotropy;
-	texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-	texture.repeat.set( 10, 10 );
+	groundPlaneMaterial = new THREE.MeshPhongMaterial( { map: groundTexture } );
+	groundTexture.anisotropy = maxAnisotropy;
+	// groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+	// groundTexture.repeat.set( 20, 20 );
 
+	var PXtexture = textureLoader.load( "textures/planes/px.jpg" );
+	PXplaneMaterial = new THREE.MeshLambertMaterial( { map: PXtexture } );
+	PXtexture.anisotropy = maxAnisotropy;
+
+	var NXtexture = textureLoader.load( "textures/planes/nx.jpg" );
+	NXplaneMaterial = new THREE.MeshLambertMaterial( { map: NXtexture } );
+	NXtexture.anisotropy = maxAnisotropy;
+
+	var PYtexture = textureLoader.load( "textures/planes/py.jpg" );
+	PYplaneMaterial = new THREE.MeshLambertMaterial( { map: PYtexture } );
+	PYtexture.anisotropy = maxAnisotropy;
+
+	var NYtexture = textureLoader.load( "textures/planes/ny.jpg" );
+	NYplaneMaterial = new THREE.MeshLambertMaterial( { map: NYtexture } );
+	NYtexture.anisotropy = maxAnisotropy;
+
+	var PZtexture = textureLoader.load( "textures/planes/pz.jpg" );
+	PZplaneMaterial = new THREE.MeshLambertMaterial( { map: PZtexture } );
+	PZtexture.anisotropy = maxAnisotropy;
+
+
+	diamondTexture = textureLoader.load( "textures/diamond.png" );
+	diamondMaterial =
+	new THREE.MeshPhongMaterial(
+	{
+		color: 0xffffff,
+		map: diamondTexture
+	});
+	diamondTexture.anisotropy = maxAnisotropy;
+	diamondTexture.wrapS = diamondTexture.wrapT = THREE.RepeatWrapping;
+	// diamondTexture.repeat.set(5, 1);
 
 	polesTexture = textureLoader.load( "textures/rock.jpg" );
 	polesMaterial =
@@ -316,7 +423,7 @@ function loadTexture() {
 		map: polesTexture
 	});
 	polesTexture.anisotropy = maxAnisotropy;
-	polesTexture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+	polesTexture.wrapS = polesTexture.wrapT = THREE.RepeatWrapping;
 	polesTexture.repeat.set(5, 1);
 }
 
@@ -344,17 +451,55 @@ function createScene()
 	loadTexture();
 
 	createPlane();
-	scene.add(plane);
+	scene.add(groundPlane);
+	scene.add(PXplane);
+	scene.add(NXplane);
+	scene.add(PYplane);
+	scene.add(NYplane);
+	scene.add(PZplane);
+
+	var loader = new THREE.OBJLoader();
 
 	for (var i = 0; i < bodyLength; ++i) {
-		var bodyBlock = newBodyBlock();
-		bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
-		bodyBlock.position.y = startPosition[1];
-		bodyBlock.position.z = startPosition[2];
-		scene.add(bodyBlock);
+		loader.load(
+		// resource URL
+		'obj/cube_bumpy.obj',
+		// called when resource is loaded
+		function ( bodyBlock ) {
 
-		body.push(bodyBlock);
+			bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
+			bodyBlock.position.y = startPosition[1];
+			bodyBlock.position.z = startPosition[2];
+			scene.add(bodyBlock);
+
+			body.push(bodyBlock);
+
+		},
+		// called when loading is in progresses
+		function ( xhr ) {
+
+			console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+		},
+		// called when loading has errors
+		function ( error ) {
+
+			console.log( 'An error happened' );
+
+		}
+		);
 	}
+
+
+	// for (var i = 0; i < bodyLength; ++i) {
+	// 	var bodyBlock = newBodyBlock();
+	// 	bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
+	// 	bodyBlock.position.y = startPosition[1];
+	// 	bodyBlock.position.z = startPosition[2];
+	// 	scene.add(bodyBlock);
+	//
+	// 	body.push(bodyBlock);
+	// }
 
 
 	createHead();
@@ -432,6 +577,13 @@ function draw()
 			updateLight();
 			time++;
 			checkEndingCondition();
+
+			if (sun.position.z < 0) {
+				scene.remove(sun);
+			}
+			else {
+				scene.add(sun);
+			}
 		}
 
 	}

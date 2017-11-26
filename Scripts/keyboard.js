@@ -11,6 +11,7 @@ var Key = {
   SPACE: 32,
   Left: 37,
   Right: 39,
+  Enter: 13,
 
   isDown: function(keyCode) {
     var down = false;
