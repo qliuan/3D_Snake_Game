@@ -20,10 +20,12 @@ var body = [];
 var poles = [];
 var bodyLength = 5;
 
-var sun, headLantern, diamondLantern, ambientLight;;
-
+var sun, headLantern, diamondLantern, ambientLight;
+var bodyUnit;
 
 var startPosition = [0, 0, STEP/2];
+
+var loader = new THREE.OBJLoader();
 
 // Create camera
 function createCamera()
@@ -37,11 +39,11 @@ function createCamera()
 
 	camera.position.x = startPosition[0] - STEP*5;
 	camera.position.y = startPosition[1];
-	camera.position.z = startPosition[2] + STEP*4;
+	camera.position.z = startPosition[2] + STEP*3;
 
 	camera.rotation.order = 'YXZ';
 
-	camera.rotation.y = -120 * Math.PI/180;
+	camera.rotation.x = -120 * Math.PI/180;
 	camera.rotation.z = -90 * Math.PI/180;
 }
 
@@ -153,30 +155,30 @@ var bodyMaterial =
 	} );
 
 
-function newBodyBlock()
-{
-	var cube = new THREE.CubeGeometry( STEP, STEP, STEP);
-
-	var bodyBlockCsg = new ThreeBSP(cube);
-
-	var boxScale = STEP/4;
-	var trans = STEP/2 - boxScale/2;
-	var boxPos = [ [trans, trans, 0], [trans, -trans, 0],
-					[-trans, trans, 0], [-trans, -trans, 0]]
-	for (var i=0; i<4; i++)
+	function newBodyBlock(x, y, z)
 	{
-		var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
-		box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
-		var boxCsg = new ThreeBSP(box);
-		bodyBlockCsg = bodyBlockCsg.subtract(boxCsg);
+		loader.load(
+			// resource URL
+			'obj/cube_bumpy.obj',
+			// called when resource is loaded
+			function ( unit ) {
+				unit.position.x = x;
+				unit.position.y = y;
+				unit.position.z = z;
+				body.push(unit);
+				scene.add(unit);
+			},
+			// called when loading is in progresses
+			function ( xhr ) {
+				console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+			},
+			// called when loading has errors
+			function ( error ) {
+				console.log( 'An error happened' );
+			}
+			);
+
 	}
-
-	bodyBlock = bodyBlockCsg.toMesh(bodyMaterial);
-	bodyBlock.receiveShadow = true;
-	bodyBlock.castShadow = true;
-
-	return bodyBlock;
-}
 
 // Create head
 var headRadius = STEP/2,
@@ -192,34 +194,35 @@ var headMaterial =
 	    roughness: 0.10,
 	    metalness: 0.60,
 	} );
-
+var sphere_noisy;
+var screwdriver;
 function createHead()
 {
-	var cube = new THREE.CubeGeometry(STEP, STEP, STEP);
-	var headCsg = new ThreeBSP(cube);
-
-	var boxScale = STEP/4;
-	var trans = STEP/2 - boxScale/2;
-	var boxPos = [ [-trans, trans, 0], [-trans, -trans, 0] ];
-	for (var i=0; i<2; i++)
-	{
-		var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
-		box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
-		var boxCsg = new ThreeBSP(box);
-		headCsg = headCsg.subtract(boxCsg);
-	}
-
-	var cylinder = new THREE.CylinderGeometry(STEP/8, STEP/8, STEP/2, 32);
-	cylinder.translate(0*STEP/4,-4*STEP/4,0*STEP);
-	cylinder.rotateX(-90 * Math.PI/180);
-	var cylinderCsg = new ThreeBSP(cylinder);
-
-	var eye = new THREE.SphereGeometry(STEP/4, 32, 32);
-	eye.translate(0*STEP/4,0*STEP/4,5*STEP/4);
-	eyeCsg = new ThreeBSP(eye);
-
-	headCsg = headCsg.union(cylinderCsg);
-	headCsg = headCsg.union(eyeCsg);
+	// var cube = new THREE.CubeGeometry(STEP, STEP, STEP);
+	// var headCsg = new ThreeBSP(cube);
+	//
+	// var boxScale = STEP/4;
+	// var trans = STEP/2 - boxScale/2;
+	// var boxPos = [ [-trans, trans, 0], [-trans, -trans, 0] ];
+	// for (var i=0; i<2; i++)
+	// {
+	// 	var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
+	// 	box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
+	// 	var boxCsg = new ThreeBSP(box);
+	// 	headCsg = headCsg.subtract(boxCsg);
+	// }
+	//
+	// var cylinder = new THREE.CylinderGeometry(STEP/8, STEP/8, STEP/2, 32);
+	// cylinder.translate(0*STEP/4,-4*STEP/4,0*STEP);
+	// cylinder.rotateX(-90 * Math.PI/180);
+	// var cylinderCsg = new ThreeBSP(cylinder);
+	//
+	// var eye = new THREE.SphereGeometry(STEP/4, 32, 32);
+	// eye.translate(0*STEP/4,0*STEP/4,5*STEP/4);
+	// eyeCsg = new ThreeBSP(eye);
+	//
+	// headCsg = headCsg.union(cylinderCsg);
+	// headCsg = headCsg.union(eyeCsg);
 
 	/*cylinder.translate(0,-STEP/2,0);
 	cylinderCsg = new ThreeBSP(cylinderCsg);
@@ -230,7 +233,65 @@ function createHead()
 	headCsg = headCsg.union(cylinderCsg);
 	headCsg = headCsg.union(eyeCsg);*/
 
-	head = headCsg.toMesh(headMaterial);
+	// head = headCsg.toMesh(headMaterial);
+
+	// bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
+	// bodyBlock.position.y = startPosition[1];
+	// bodyBlock.position.z = startPosition[2];
+	// bodyBlock.scale = [STEP, STEP, STEP];
+	// bodyUnit = bodyBlock;
+	// scene.add(bodyBlock);
+	//
+	// body.push(bodyBlock);
+
+	loader.load(
+	// resource URL
+	'obj/sphere_noisy.obj',
+	// called when resource is loaded
+	function ( obj ) {
+		sphere_noisy = obj.children[0].geometry;
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+
+		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+	},
+	// called when loading has errors
+	function ( error ) {
+
+		console.log( 'An error happened' );
+
+	}
+	);
+	loader.load(
+	// resource URL
+	'obj/screwdriver.obj',
+	// called when resource is loaded
+	function ( obj ) {
+		screwdriver = obj.children[0].geometry;
+	},
+	// called when loading is in progresses
+	function ( xhr ) {
+
+		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+	},
+	// called when loading has errors
+	function ( error ) {
+
+		console.log( 'An error happened' );
+
+	}
+	);
+	var sphereGeometry = sphere_noisy;
+	var screwdriverGeometry1 = screwdriver;
+	var screwdriverGeometry2 = screwdriver;
+	screwdriverGeometry2.rotateX(-90 * Math.PI/180);
+	var sphere_noisyCsg = new ThreeBSP(sphereGeometry);
+	var screwdriverCsg1 = new ThreeBSP(screwdriverGeometry1);
+	var screwdriverCsg2 = new ThreeBSP(screwdriverGeometry2);
+	var head = sphere_noisyCsg.union(screwdriverCsg1).union(screwdriverCsg2).toMesh(diamondMaterial);
 	head.receiveShadow = true;
 	head.castShadow = true;
 }
@@ -249,7 +310,7 @@ function createDiamond()
  var cylinder1 = new ThreeBSP(geometry1);
  var cylinder2 = new ThreeBSP(geometry2);
 
-  var cylinder = cylinder1.union(cylinder2);
+	var cylinder = cylinder1.union(cylinder2);
 
  diamond = cylinder.toMesh(diamondMaterial);
 
@@ -458,49 +519,11 @@ function createScene()
 	scene.add(NYplane);
 	scene.add(PZplane);
 
-	var loader = new THREE.OBJLoader();
+
 
 	for (var i = 0; i < bodyLength; ++i) {
-		loader.load(
-		// resource URL
-		'obj/cube_bumpy.obj',
-		// called when resource is loaded
-		function ( bodyBlock ) {
-
-			bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
-			bodyBlock.position.y = startPosition[1];
-			bodyBlock.position.z = startPosition[2];
-			scene.add(bodyBlock);
-
-			body.push(bodyBlock);
-
-		},
-		// called when loading is in progresses
-		function ( xhr ) {
-
-			console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-		},
-		// called when loading has errors
-		function ( error ) {
-
-			console.log( 'An error happened' );
-
-		}
-		);
+		newBodyBlock(startPosition[0] - STEP - i * STEP, startPosition[1], startPosition[2]);
 	}
-
-
-	// for (var i = 0; i < bodyLength; ++i) {
-	// 	var bodyBlock = newBodyBlock();
-	// 	bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
-	// 	bodyBlock.position.y = startPosition[1];
-	// 	bodyBlock.position.z = startPosition[2];
-	// 	scene.add(bodyBlock);
-	//
-	// 	body.push(bodyBlock);
-	// }
-
 
 	createHead();
 	scene.add(head);
@@ -555,10 +578,9 @@ var time = 0;
 
 function draw()
 {
+	requestAnimationFrame(draw);
 	if (!WIN && !LOSE)
 	{
-		requestAnimationFrame(draw);
-
 		now = Date.now();
 		delta = now - then;
 
@@ -571,8 +593,8 @@ function draw()
 			headMovement();
 			checkDiamond();
 			bodyMovement();
-			headLantern.target = diamond;
-			diamond.rotation.y += 0.1;
+			// headLantern.target = diamond;
+			diamond.rotation.y += 0.2;
 			updateCamera();
 			updateLight();
 			time++;
@@ -590,10 +612,12 @@ function draw()
 	else if (WIN)
 	{
 		gameWin();
+		restart();
 	}
 	else
 	{
 		gameLose();
+		restart();
 	}
 
 }

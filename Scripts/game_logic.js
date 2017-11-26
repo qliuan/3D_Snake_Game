@@ -99,7 +99,7 @@ function headMovement()
 	head.position.x += headXSpeed;
 	head.position.y += headYSpeed;
 
-	head.geometry.verticesNeedUpdate = true;
+	/*head.geometry.verticesNeedUpdate = true;*/
 }
 
 function bodyMovement()
@@ -116,7 +116,7 @@ function bodyMovement()
 		tail.position.y = neckY;
 
 		body.unshift(tail);
-		tail.geometry.verticesNeedUpdate = true;
+		/*tail.geometry.verticesNeedUpdate = true;*/
 	}
 
 	// After adding the body
@@ -223,14 +223,10 @@ function checkDiamond()
 
 function addBody()
 {
-	var newBody = newBodyBlock();
+	newBodyBlock(neckX, neckY, STEP/2);
 	// bodyBlock.receiveShadow = true;
+	var newBody = body.pop();
 	body.unshift(newBody);
-	scene.add(newBody);
-
-	newBody.position.x = neckX;
-	newBody.position.y = neckY;
-	newBody.position.z = STEP/2;
 }
 
 
