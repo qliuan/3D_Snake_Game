@@ -5,7 +5,7 @@ var STEP = 10;
 var headXSpeed = STEP, headYSpeed = 0;
 var score = 0;
 var difficulty = 1.0; // 1.0 normal, >1.0 increase speed, <1.0 decrease speed
-var poleNum = Math.ceil(Math.pow(difficulty,4)*2);
+var poleNum = Math.ceil(Math.pow(difficulty,2)*6);
 var MAX_SCORE = Math.ceil(5*difficulty);
 var WIN = false, LOSE = false;
 
@@ -37,14 +37,14 @@ function createCamera()
 		NEAR,
 		FAR);
 
-	camera.position.x = startPosition[0] - STEP*5;
-	camera.position.y = startPosition[1];
+	// camera.position.x = startPosition[0] - STEP*5;
+	// camera.position.y = startPosition[1];
 	camera.position.z = startPosition[2] + STEP*3;
 
 	camera.rotation.order = 'YXZ';
 
-	camera.rotation.x = -120 * Math.PI/180;
-	camera.rotation.z = -90 * Math.PI/180;
+	// camera.rotation.x = -120 * Math.PI/180;
+	// camera.rotation.z = -90 * Math.PI/180;
 }
 
 // Create plane
@@ -139,7 +139,7 @@ function createPlane()
 
 	PZplane.rotation.x = 180 * Math.PI/180;
 	// PZplane.rotation.z = 180 * Math.PI/180;
-	PZplane.position.z = planeHeight / 4;
+	PZplane.position.z = planeHeight / 4 + planeHeight / 32;
 
 	// PZplane.receiveShadow = true;
 	// PZplane.castShadow = true;
@@ -147,13 +147,14 @@ function createPlane()
 }
 
 // Create body
-var bodyMaterial =
-	new THREE.MeshStandardMaterial( {
-	    color: 0x8ec0f2,
-	    roughness: 0.10,
-	    metalness: 0.60,
-	} );
-
+// var bodyMaterial =
+// 	new THREE.MeshStandardMaterial( {
+// 	    color: 0x8ec0f2,
+// 	    roughness: 0.10,
+// 	    metalness: 0.60,
+// 	} );
+var bodyTexture;
+var bodyMaterial;
 
 	function newBodyBlock(x, y, z)
 	{
@@ -161,7 +162,9 @@ var bodyMaterial =
 			// resource URL
 			'obj/cube_bumpy.obj',
 			// called when resource is loaded
-			function ( unit ) {
+			function ( u ) {
+				var geo = u.children[0].geometry.scale(2,2,2);
+				var unit = new THREE.Mesh( geo, bodyMaterial );
 				unit.position.x = x;
 				unit.position.y = y;
 				unit.position.z = z;
@@ -198,31 +201,34 @@ var sphere_noisy;
 var screwdriver;
 function createHead()
 {
-	// var cube = new THREE.CubeGeometry(STEP, STEP, STEP);
-	// var headCsg = new ThreeBSP(cube);
-	//
-	// var boxScale = STEP/4;
-	// var trans = STEP/2 - boxScale/2;
-	// var boxPos = [ [-trans, trans, 0], [-trans, -trans, 0] ];
-	// for (var i=0; i<2; i++)
-	// {
-	// 	var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
-	// 	box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
-	// 	var boxCsg = new ThreeBSP(box);
-	// 	headCsg = headCsg.subtract(boxCsg);
-	// }
-	//
-	// var cylinder = new THREE.CylinderGeometry(STEP/8, STEP/8, STEP/2, 32);
-	// cylinder.translate(0*STEP/4,-4*STEP/4,0*STEP);
-	// cylinder.rotateX(-90 * Math.PI/180);
-	// var cylinderCsg = new ThreeBSP(cylinder);
-	//
-	// var eye = new THREE.SphereGeometry(STEP/4, 32, 32);
-	// eye.translate(0*STEP/4,0*STEP/4,5*STEP/4);
-	// eyeCsg = new ThreeBSP(eye);
-	//
-	// headCsg = headCsg.union(cylinderCsg);
-	// headCsg = headCsg.union(eyeCsg);
+	var cube = new THREE.SphereGeometry(STEP, 64, 64);
+	var headCsg = new ThreeBSP(cube);
+
+	var boxScale = STEP/4;
+	var trans = STEP/2 - boxScale/2;
+	var boxPos = [ [-trans, trans, 0], [-trans, -trans, 0] ];
+	for (var i=0; i<2; i++)
+	{
+		var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
+		box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
+		var boxCsg = new ThreeBSP(box);
+		headCsg = headCsg.subtract(boxCsg);
+	}
+
+	var cylinder = new THREE.CylinderGeometry(STEP/8, STEP/8, STEP/2, 32);
+	cylinder.translate(0*STEP/4,-4*STEP/4,0*STEP);
+	cylinder.rotateX(-90 * Math.PI/180);
+	var cylinderCsg = new ThreeBSP(cylinder);
+
+	var eye = new THREE.SphereGeometry(STEP/4, 32, 32);
+	eye.translate(0*STEP/4,0*STEP/4,5*STEP/4);
+	eyeCsg = new ThreeBSP(eye);
+
+	headCsg = headCsg.union(cylinderCsg);
+	headCsg = headCsg.union(eyeCsg);
+	head = headCsg.toMesh(headMaterial);
+	head.receiveShadow = true;
+	head.castShadow = true;
 
 	/*cylinder.translate(0,-STEP/2,0);
 	cylinderCsg = new ThreeBSP(cylinderCsg);
@@ -233,7 +239,7 @@ function createHead()
 	headCsg = headCsg.union(cylinderCsg);
 	headCsg = headCsg.union(eyeCsg);*/
 
-	// head = headCsg.toMesh(headMaterial);
+
 
 	// bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
 	// bodyBlock.position.y = startPosition[1];
@@ -243,7 +249,7 @@ function createHead()
 	// scene.add(bodyBlock);
 	//
 	// body.push(bodyBlock);
-
+/*
 	loader.load(
 	// resource URL
 	'obj/sphere_noisy.obj',
@@ -291,9 +297,8 @@ function createHead()
 	var sphere_noisyCsg = new ThreeBSP(sphereGeometry);
 	var screwdriverCsg1 = new ThreeBSP(screwdriverGeometry1);
 	var screwdriverCsg2 = new ThreeBSP(screwdriverGeometry2);
-	var head = sphere_noisyCsg.union(screwdriverCsg1).union(screwdriverCsg2).toMesh(diamondMaterial);
-	head.receiveShadow = true;
-	head.castShadow = true;
+	var head = sphere_noisyCsg.union(screwdriverCsg1).union(screwdriverCsg2).toMesh(diamondMaterial);*/
+
 }
 
 
@@ -327,7 +332,7 @@ function createHeadLantern()
 	headLantern.position.set(head.position.x, head.position.y, head.position.z + STEP * 3);
 	headLantern.intensity = 1; //3
 	headLantern.castShadow = true;
-
+	headLantern.decay = 2;
 }
 
 // Create diamond lantern
@@ -465,6 +470,17 @@ function loadTexture() {
 	PZtexture.anisotropy = maxAnisotropy;
 
 
+	bodyTexture = textureLoader.load( "textures/water.jpg" );
+	bodyMaterial =
+	new THREE.MeshPhongMaterial(
+	{
+		color: 0xffffff,
+		map: bodyTexture
+	});
+	bodyTexture.anisotropy = maxAnisotropy;
+	bodyTexture.wrapS = bodyTexture.wrapT = THREE.RepeatWrapping;
+	bodyTexture.repeat.set(0.1, 0.1);
+
 	diamondTexture = textureLoader.load( "textures/diamond.png" );
 	diamondMaterial =
 	new THREE.MeshPhongMaterial(
@@ -474,7 +490,7 @@ function loadTexture() {
 	});
 	diamondTexture.anisotropy = maxAnisotropy;
 	diamondTexture.wrapS = diamondTexture.wrapT = THREE.RepeatWrapping;
-	// diamondTexture.repeat.set(5, 1);
+	// diamondTexture.repeat.set(1, 1);
 
 	polesTexture = textureLoader.load( "textures/rock.jpg" );
 	polesMaterial =
