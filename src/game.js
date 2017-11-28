@@ -148,7 +148,7 @@ var bodyMaterial;
 	{
 		loader.load(
 			// resource URL
-			'../obj/cube_bumpy.obj',
+			'obj/cube_bumpy.obj',
 			// called when resource is loaded
 			function ( u ) {
 				var geo = u.children[0].geometry.scale(2,2,2);
@@ -336,35 +336,35 @@ function newPole()
 function loadTexture() {
 	var textureLoader = new THREE.TextureLoader();
 	var maxAnisotropy = renderer.getMaxAnisotropy();
-	var groundTexture = textureLoader.load( "../textures/planes/nz.jpg" );
+	var groundTexture = textureLoader.load( "textures/planes/nz.jpg" );
 
 	groundPlaneMaterial = new THREE.MeshPhongMaterial( { map: groundTexture } );
 	groundTexture.anisotropy = maxAnisotropy;
 	// groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
 	// groundTexture.repeat.set( 20, 20 );
 
-	var PXtexture = textureLoader.load( "../textures/planes/px.jpg" );
+	var PXtexture = textureLoader.load( "textures/planes/px.jpg" );
 	PXplaneMaterial = new THREE.MeshLambertMaterial( { map: PXtexture } );
 	PXtexture.anisotropy = maxAnisotropy;
 
-	var NXtexture = textureLoader.load( "../textures/planes/nx.jpg" );
+	var NXtexture = textureLoader.load( "textures/planes/nx.jpg" );
 	NXplaneMaterial = new THREE.MeshLambertMaterial( { map: NXtexture } );
 	NXtexture.anisotropy = maxAnisotropy;
 
-	var PYtexture = textureLoader.load( "../textures/planes/py.jpg" );
+	var PYtexture = textureLoader.load( "textures/planes/py.jpg" );
 	PYplaneMaterial = new THREE.MeshLambertMaterial( { map: PYtexture } );
 	PYtexture.anisotropy = maxAnisotropy;
 
-	var NYtexture = textureLoader.load( "../textures/planes/ny.jpg" );
+	var NYtexture = textureLoader.load( "textures/planes/ny.jpg" );
 	NYplaneMaterial = new THREE.MeshLambertMaterial( { map: NYtexture } );
 	NYtexture.anisotropy = maxAnisotropy;
 
-	var PZtexture = textureLoader.load( "../textures/planes/pz.jpg" );
+	var PZtexture = textureLoader.load( "textures/planes/pz.jpg" );
 	PZplaneMaterial = new THREE.MeshLambertMaterial( { map: PZtexture } );
 	PZtexture.anisotropy = maxAnisotropy;
 
 
-	bodyTexture = textureLoader.load( "../textures/water.jpg" );
+	bodyTexture = textureLoader.load( "textures/water.jpg" );
 	bodyMaterial =
 	new THREE.MeshPhongMaterial(
 	{
@@ -375,7 +375,7 @@ function loadTexture() {
 	bodyTexture.wrapS = bodyTexture.wrapT = THREE.RepeatWrapping;
 	bodyTexture.repeat.set(0.1, 0.1);
 
-	diamondTexture = textureLoader.load( "../textures/diamond.png" );
+	diamondTexture = textureLoader.load( "textures/diamond.png" );
 	diamondMaterial =
 	new THREE.MeshPhongMaterial(
 	{
@@ -386,7 +386,7 @@ function loadTexture() {
 	diamondTexture.wrapS = diamondTexture.wrapT = THREE.RepeatWrapping;
 	// diamondTexture.repeat.set(1, 1);
 
-	polesTexture = textureLoader.load( "../textures/rock.jpg" );
+	polesTexture = textureLoader.load( "textures/rock.jpg" );
 	polesMaterial =
 	new THREE.MeshPhongMaterial(
 	{
