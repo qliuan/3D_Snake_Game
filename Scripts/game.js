@@ -37,14 +37,8 @@ function createCamera()
 		NEAR,
 		FAR);
 
-	// camera.position.x = startPosition[0] - STEP*5;
-	// camera.position.y = startPosition[1];
 	camera.position.z = startPosition[2] + STEP*3;
-
 	camera.rotation.order = 'YXZ';
-
-	// camera.rotation.x = -120 * Math.PI/180;
-	// camera.rotation.z = -90 * Math.PI/180;
 }
 
 // Create plane
@@ -146,13 +140,7 @@ function createPlane()
 
 }
 
-// Create body
-// var bodyMaterial =
-// 	new THREE.MeshStandardMaterial( {
-// 	    color: 0x8ec0f2,
-// 	    roughness: 0.10,
-// 	    metalness: 0.60,
-// 	} );
+
 var bodyTexture;
 var bodyMaterial;
 
@@ -190,30 +178,15 @@ var headRadius = STEP/2,
 
 var headMaterial =
 	new THREE.MeshStandardMaterial( {
-	    /*color: 0x8ec0f2,
-	    roughness: 0.42,
-	    metalness: 0.37,*/
 	    color: 0x8ec0f2,
 	    roughness: 0.10,
 	    metalness: 0.60,
 	} );
-var sphere_noisy;
-var screwdriver;
+
 function createHead()
 {
-	var cube = new THREE.SphereGeometry(STEP, 64, 64);
-	var headCsg = new ThreeBSP(cube);
-
-	var boxScale = STEP/4;
-	var trans = STEP/2 - boxScale/2;
-	var boxPos = [ [-trans, trans, 0], [-trans, -trans, 0] ];
-	for (var i=0; i<2; i++)
-	{
-		var box = new THREE.BoxGeometry( boxScale, boxScale, STEP);
-		box.translate(boxPos[i][0],boxPos[i][1],boxPos[i][2]);
-		var boxCsg = new ThreeBSP(box);
-		headCsg = headCsg.subtract(boxCsg);
-	}
+	var sphere = new THREE.SphereGeometry(STEP, 32, 32);
+	var headCsg = new ThreeBSP(sphere);
 
 	var cylinder = new THREE.CylinderGeometry(STEP/8, STEP/8, STEP/2, 32);
 	cylinder.translate(0*STEP/4,-4*STEP/4,0*STEP);
@@ -229,76 +202,6 @@ function createHead()
 	head = headCsg.toMesh(headMaterial);
 	head.receiveShadow = true;
 	head.castShadow = true;
-
-	/*cylinder.translate(0,-STEP/2,0);
-	cylinderCsg = new ThreeBSP(cylinderCsg);
-
-	eye.translate(0,-STEP/2,0);
-	eyeCsg = new ThreeBSP(eyeCsg);
-
-	headCsg = headCsg.union(cylinderCsg);
-	headCsg = headCsg.union(eyeCsg);*/
-
-
-
-	// bodyBlock.position.x = startPosition[0] - STEP - i * STEP;
-	// bodyBlock.position.y = startPosition[1];
-	// bodyBlock.position.z = startPosition[2];
-	// bodyBlock.scale = [STEP, STEP, STEP];
-	// bodyUnit = bodyBlock;
-	// scene.add(bodyBlock);
-	//
-	// body.push(bodyBlock);
-/*
-	loader.load(
-	// resource URL
-	'obj/sphere_noisy.obj',
-	// called when resource is loaded
-	function ( obj ) {
-		sphere_noisy = obj.children[0].geometry;
-	},
-	// called when loading is in progresses
-	function ( xhr ) {
-
-		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-	},
-	// called when loading has errors
-	function ( error ) {
-
-		console.log( 'An error happened' );
-
-	}
-	);
-	loader.load(
-	// resource URL
-	'obj/screwdriver.obj',
-	// called when resource is loaded
-	function ( obj ) {
-		screwdriver = obj.children[0].geometry;
-	},
-	// called when loading is in progresses
-	function ( xhr ) {
-
-		console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
-
-	},
-	// called when loading has errors
-	function ( error ) {
-
-		console.log( 'An error happened' );
-
-	}
-	);
-	var sphereGeometry = sphere_noisy;
-	var screwdriverGeometry1 = screwdriver;
-	var screwdriverGeometry2 = screwdriver;
-	screwdriverGeometry2.rotateX(-90 * Math.PI/180);
-	var sphere_noisyCsg = new ThreeBSP(sphereGeometry);
-	var screwdriverCsg1 = new ThreeBSP(screwdriverGeometry1);
-	var screwdriverCsg2 = new ThreeBSP(screwdriverGeometry2);
-	var head = sphere_noisyCsg.union(screwdriverCsg1).union(screwdriverCsg2).toMesh(diamondMaterial);*/
-
 }
 
 
@@ -338,14 +241,6 @@ function createHeadLantern()
 // Create diamond lantern
 function createDiamondLantern()
 {
-	/*diamondLantern = new THREE.SpotLight(0xffffff);
-	diamondLantern.position.set(diamond.position.x, diamond.position.y, diamond.position.z + STEP * 5);
-	diamondLantern.intensity = 5;
-	diamondLantern.castShadow = true;
-
-	diamondLantern.target = diamond;
-	diamondLantern.angle = Math.PI/6;*/
-
 	diamondLantern = new THREE.PointLight(0xffffff);
 	diamondLantern.position.set(diamond.position.x, diamond.position.y, diamond.position.z + STEP * 3);
 	diamondLantern.intensity = 0.25;
@@ -429,7 +324,6 @@ function newPole()
 	pole.position.x = x;
 	pole.position.y = y;
 	pole.position.z = z;
-
 	pole.rotation.x = -90 * Math.PI/180;
 
 	pole.receiveShadow = true;
@@ -443,7 +337,7 @@ function loadTexture() {
 	var textureLoader = new THREE.TextureLoader();
 	var maxAnisotropy = renderer.getMaxAnisotropy();
 	var groundTexture = textureLoader.load( "textures/planes/nz.jpg" );
-	/*var texture = textureLoader.load( "https://github.com/mrdoob/three.js/blob/master/examples/textures/crate.gif" );*/
+
 	groundPlaneMaterial = new THREE.MeshPhongMaterial( { map: groundTexture } );
 	groundTexture.anisotropy = maxAnisotropy;
 	// groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
@@ -524,7 +418,6 @@ function createScene()
 
 	document.getElementById("gameCanvas").appendChild(renderer.domElement);
 
-
 	loadTexture();
 
 	createPlane();
@@ -534,8 +427,6 @@ function createScene()
 	scene.add(PYplane);
 	scene.add(NYplane);
 	scene.add(PZplane);
-
-
 
 	for (var i = 0; i < bodyLength; ++i) {
 		newBodyBlock(startPosition[0] - STEP - i * STEP, startPosition[1], startPosition[2]);
