@@ -1,28 +1,30 @@
-# COMP5411Redering
-Rendering Project for COMP 5411
+# 3D Snake Game
 
-https://threejs.org/ for example projects.
+This is a first-person perspective 3D snake game built from WebGL.
 
-1. 3D Data Visualization (http://armsglobe.chromeexperiments.com/)
-	电力使用数据
-	
-2. 3D Game Environment (http://collinhover.github.io/kaiopua/)
-	改变texture的球
-	
-3. 机械风格shader (https://www.batmanarkhamknight.com/en_US/batmobile)
-	
-4.http://hexgl.bkcore.com/ 这个游戏有GitHub的source code
+## Motivation
 
-5.https://experiments.withgoogle.com/chrome/globe 3D global Data Visualization example
-	1. new style of visualizing
-		shader/style: new ideas
-		data: existing data
-	2. new data with same visulization
-		reimplement the same style
+The style of the traditional snake game is too plain and cannot create an immersive game environment for players. We decided to modify the game into a 3D game with first-person perspective using what we have learnt in Advanced Computer Graphics to enhance user experience.
 
-6.http://stars.chromeexperiments.com/ galaxy
-	fancy visulization of loads of data, how to achieve it in affordable time.
-	
-7. human body model with organs 
+## Getting Started
 
-8. extend geometry program to make a virtual lab combining all we have learnt
+Run the 3D_Snake.html or click this [link](https://qliuan.github.io/3D_Snake_Game/) to start the game.
+
+## Prerequisites
+
+You can use any modern browser that supports WebGL to run this game.
+
+```
+e.g. chrome, firefox
+```
+
+## Controls
+
+* Use left and right arrows to rotate the moving direction of the snake.
+* Use spacebar to start or pause the game.
+* Use enter to restart the game.
+
+## Contributors
+
+* **LIU Qinhan** qliuan@connect.ust.hk
+* **LIU Ji** jliubk@connect.ust.hk
