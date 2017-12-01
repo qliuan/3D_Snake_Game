@@ -8,7 +8,7 @@ The style of the traditional snake game is too plain and cannot create an immers
 
 ## Getting Started
 
-Run the 3D_Snake.html or click this [link](https://qliuan.github.io/3D_Snake_Game/) to start the game.
+Run the index.html or click this [link](https://qliuan.github.io/3D_Snake_Game/) to start the game.
 
 ## Prerequisites
 
